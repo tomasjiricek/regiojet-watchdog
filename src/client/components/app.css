@@ -1,0 +1,36 @@
+.btn-primary {
+    color: #000 !important;
+    background-color: #fbc901 !important;
+    border-color: #cea606 !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    color: #000 !important;
+    background-color: #d3a903 !important;
+    border-color: #af8e08 !important;
+}
+
+.btn-primary:active, .btn-primary.active {
+    color: #fff !important;
+    background-color: #927501 !important;
+    border-color: #776002 !important;
+}
+
+#content-tabs>ul.nav-tabs>li>a {
+    color: #666;
+}
+
+#content-tabs>ul.nav-tabs>li>a:hover {
+    color: #444;
+    border-bottom-color: #cea606;
+}
+
+#content-tabs>ul.nav-tabs>li.active>a {
+    color: #000;
+    background-color: #fbc901;
+    border-color: #cea606;
+}
+
+#content-tabs>ul.nav-tabs {
+    border-color: #cea606;
+}

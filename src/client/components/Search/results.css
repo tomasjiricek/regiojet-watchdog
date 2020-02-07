@@ -1,0 +1,22 @@
+tr.route .tools {
+    float: right;
+}
+
+tr.route .tools a {
+    text-decoration: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #666;
+}
+
+tr.route .tools a:hover {
+    color: #000;
+}
+
+tr.route.watched {
+    background-color: #cfc;
+}
+
+tr.route.watched:hover {
+    background-color: #afa;
+}

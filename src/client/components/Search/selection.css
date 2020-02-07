@@ -1,0 +1,13 @@
+form.search .row > * {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+form.search .row .swap-stations {
+    border-radius: 0;
+}
+
+form.search .search-inputs>div.rbt:last-child input.form-control {
+    border-bottom-right-radius: 4px;
+    border-top-right-radius: 4px;
+}
