@@ -12,7 +12,7 @@ export default class Watchdog extends Component {
         const { routes } = this.props;
 
         if (routes.length === 0) {
-            return <h3>Žádný hlídaný spoj</h3>;
+            return <h3 style={{margin: '0 20px'}}>Žádný sledovaný spoj</h3>;
         }
 
         return (
@@ -56,7 +56,7 @@ export default class Watchdog extends Component {
                         <a href="#" onClick={this.handleUnwatch.bind(this, route)}>
                             <Glyphicon glyph='eye-close'/>
                         </a>
-                    </span> 
+                    </span>
                 </Col>
             </Row>
         );
