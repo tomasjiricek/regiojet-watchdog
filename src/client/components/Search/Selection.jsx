@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button, Col, Form, FormControl, Glyphicon, Grid, FormGroup, InputGroup, Row } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 
-import { getUTCISODate } from '../../utils/date';
 import './selection.css';
 
 const FILTER_FIELDS = ['name', 'fullname', 'country', 'city'];
