@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Col, Glyphicon, Grid, Row, Table } from 'react-bootstrap';
+import { Glyphicon } from 'react-bootstrap';
+
+import { Col, Row, Table } from '../Table';
 
 import './results.css';
 
@@ -43,10 +45,10 @@ class Results extends Component {
         }
 
         return (
-            <TableGrid hover>
+            <Table hover>
                 {this.renderTableHead()}
                 {this.renderTableBody()}
-            </TableGrid>
+            </Table>
         );
     }
 
@@ -58,19 +60,19 @@ class Results extends Component {
             className += ' watched';
         }
         return (
-            <TableRow className={className} key={id}>
-                <TableCol>{new Date(departureTime).toLocaleTimeString()}</TableCol>
-                <TableCol>{freeSeatsCount}</TableCol>
-                <TableCol>{travelTime}</TableCol>
-                <TableCol>
+            <Row className={className} key={id}>
+                <Col>{new Date(departureTime).toLocaleTimeString()}</Col>
+                <Col>{freeSeatsCount}</Col>
+                <Col>{travelTime}</Col>
+                <Col>
                     {transfersCount}
                     <span className="tools">
                         <a href="#" onClick={this.handleToggleWatchdog.bind(this, route)}>
                             <Glyphicon glyph={isWatched ? 'eye-close' : 'eye-open'}/>
                         </a>
                     </span>
-                </TableCol>
-            </TableRow>
+                </Col>
+            </Row>
         );
     }
 
@@ -84,36 +86,22 @@ class Results extends Component {
 
         return (
             <thead>
-                <TableRow>
-                    <TableCol colSpan={4}>
+                <Row>
+                    <Col colSpan={4}>
                         <strong>{departureStation.fullname}</strong>
                         <Glyphicon glyph="arrow-right" style={{ margin: '0 15px' }}/>
                         <strong>{arrivalStation.fullname}</strong>
-                    </TableCol>
-                </TableRow>
-                <TableRow>
-                    <TableCol heading>Odjezd</TableCol>
-                    <TableCol heading>Volných míst</TableCol>
-                    <TableCol heading>Doba cesty</TableCol>
-                    <TableCol heading>Přestupů</TableCol>
-                </TableRow>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col heading>Odjezd</Col>
+                    <Col heading>Volných míst</Col>
+                    <Col heading>Doba cesty</Col>
+                    <Col heading>Přestupů</Col>
+                </Row>
             </thead>
         );
     }
 }
-
-const TableCol = ({ children, heading, ...props }) => (
-    <Col componentClass={heading ? 'th' : 'td'} {...props}>{children}</Col>
-);
-
-const TableGrid = ({ children, ...props }) => (
-    <Grid fluid>
-        <Table {...props}>{children}</Table>
-    </Grid>
-);
-
-const TableRow = ({ children, ...props}) => (
-    <Row componentClass="tr" {...props}>{children}</Row>
-);
 
 export default Results;
