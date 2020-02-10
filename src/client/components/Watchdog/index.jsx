@@ -12,7 +12,7 @@ export default class Watchdog extends Component {
         const { routes } = this.props;
 
         if (routes.length === 0) {
-            return <h3 style={{margin: '0 20px'}}>Žádný sledovaný spoj</h3>;
+            return <h3 style={{margin: '20px'}}>Žádný sledovaný spoj</h3>;
         }
 
         return (
