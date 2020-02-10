@@ -34,12 +34,12 @@ class Results extends Component {
             routes,
         } = this.props;
 
-        if (!departureStation || !arrivalStation || routes === null) {
-            return null;
-        }
-
         if (loading) {
             return <h3>Vyhledávání spojů...</h3>;
+        }
+
+        if (!departureStation || !arrivalStation || routes === null) {
+            return null;
         }
 
         return (
@@ -68,7 +68,7 @@ class Results extends Component {
                         <a href="#" onClick={this.handleToggleWatchdog.bind(this, route)}>
                             <Glyphicon glyph={isWatched ? 'eye-close' : 'eye-open'}/>
                         </a>
-                    </span> 
+                    </span>
                 </TableCol>
             </TableRow>
         );

@@ -1,10 +1,25 @@
+tr.route .tools {
+    float: right;
+}
+
+tr.route .tools a {
+    text-decoration: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #666;
+}
+
+tr.route .tools a:hover {
+    color: #000;
+}
+
 .btn-primary {
     color: #000 !important;
     background-color: #fbc901 !important;
     border-color: #cea606 !important;
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-primary:hover:not(:disabled), .btn-primary:focus:not(:disabled) {
     color: #000 !important;
     background-color: #d3a903 !important;
     border-color: #af8e08 !important;

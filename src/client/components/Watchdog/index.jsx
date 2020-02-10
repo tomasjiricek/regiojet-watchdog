@@ -4,6 +4,10 @@ import { Glyphicon } from 'react-bootstrap';
 import { Col, Row, Table } from '../Table';
 
 export default class Watchdog extends Component {
+    handleUnwatch = (route) => {
+        this.props.onUnwatch(route);
+    }
+
     render() {
         const { routes } = this.props;
 
@@ -42,15 +46,15 @@ export default class Watchdog extends Component {
         const date = new Date(departureTime);
 
         return (
-            <Row key={id}>
+            <Row key={id} className="route">
                 <Col>{`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`}</Col>
                 <Col>{freeSeatsCount}</Col>
                 <Col>{travelTime}</Col>
                 <Col>
                     {transfersCount}
                     <span className="tools">
-                        <a href="#" onClick={()=>false}>
-                            <Glyphicon glyph='cross'/>
+                        <a href="#" onClick={this.handleUnwatch.bind(this, route)}>
+                            <Glyphicon glyph='eye-close'/>
                         </a>
                     </span> 
                 </Col>

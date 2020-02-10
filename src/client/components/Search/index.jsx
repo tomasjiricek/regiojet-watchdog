@@ -17,10 +17,11 @@ class Search extends Component {
             stations: null,
             routes: null,
         };
+        this.destinationsRequestController = new AbortController();
     }
 
     componentDidMount() {
-        fetch(API_URL.DESTINATIONS)
+        fetch(API_URL.DESTINATIONS, { signal: this.destinationsRequestController.signal })
             .then((res) => {
                 if (res.status !== 200) {
                     return;
@@ -32,12 +33,20 @@ class Search extends Component {
             });
     }
 
+    componentWillUnmount() {
+        this.destinationsRequestController.abort();
+    }
+
+    handleDateChange = (date) => {
+        this.props.onDateChange(date);
+    }
+
     handleToggleWatchdog = (route) => {
         this.props.onToggleWatchdog(route);
     }
 
-    handleSearchSubmit = (date) => {
-        const { departureStation, arrivalStation } = this.props;
+    handleSearchSubmit = () => {
+        const { date, departureStation, arrivalStation } = this.props;
         const { minDeparture, maxDeparture } = this.state;
         const requestQuery = {
             date,
@@ -46,6 +55,8 @@ class Search extends Component {
             departureStationId: departureStation.id,
             arrivalStationId: arrivalStation.id,
         };
+
+        this.setState({ loadingRoutes: true });
 
         request(API_URL.ROUTE_SEARCH, requestQuery)
             .then((res) => {
@@ -57,13 +68,14 @@ class Search extends Component {
             .catch((error) => {
                 console.log('Search request error:', error);
             });
-
-        this.setState({ loadingRoutes: true });
     }
 
     handleStationChange = (isDeparture, station) => {
-        console.log(isDeparture, station);
         this.props.onStationChange(isDeparture, station);
+    }
+
+    handleStationsSwap = () => {
+        this.props.onStationsSwap();
     }
 
     processDestinationsResponse = (res) => {
@@ -92,7 +104,7 @@ class Search extends Component {
             stations,
         } = this.state;
 
-        const { departureStation, arrivalStation } = this.props;
+        const { date, departureStation, arrivalStation } = this.props;
 
         if (loadingDestinations) {
             return <h3>Načítání...</h3>;
@@ -101,11 +113,14 @@ class Search extends Component {
         return (
             <Fragment>
                 <Selection
-                    departureStation={departureStation}
                     arrivalStation={arrivalStation}
+                    date={date}
+                    departureStation={departureStation}
                     loading={loadingRoutes}
                     stations={stations}
+                    onDateChange={this.handleDateChange}
                     onStationChange={this.handleStationChange}
+                    onStationsSwap={this.handleStationsSwap}
                     onSubmit={this.handleSearchSubmit}
                 />
                 <Results

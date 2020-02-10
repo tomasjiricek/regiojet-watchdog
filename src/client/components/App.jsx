@@ -5,26 +5,21 @@ import About from './About';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
 import Watchdog from './Watchdog';
+import { getUTCISODate } from '../utils/date';
 
 import './app.css';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
-
-        const state = StateStorage.load();
-        
-        if (state !== null) {
-            this.state = state;
-            return;
-        }
-
-        this.state = {
+        const defaultState = {
             activeContentTab: 1,
+            date: getUTCISODate(new Date()),
             watchedRoutes: [],
             arrivalStation: null,
             departureStation: null,
         };
+        this.state = this.loadStateFromStorage(defaultState);
     }
 
     componentDidMount() {
@@ -37,6 +32,10 @@ export default class App extends Component {
         clearInterval(this.stateSaveInterval);
     }
 
+    handleDateChange = (date) => {
+        this.setState({ date });
+    }
+
     handleContentTabSelected = (selectedKey) => {
         this.setState({ activeContentTab: selectedKey });
     }
@@ -47,6 +46,11 @@ export default class App extends Component {
         } else {
             this.setState({ arrivalStation: station });
         }
+    }
+
+    handleStationsSwap = () => {
+        const { arrivalStation, departureStation } = this.state;
+        this.setState({ arrivalStation: departureStation, departureStation: arrivalStation });
     }
 
     handleToggleWatchdog = (route) => {
@@ -64,6 +68,24 @@ export default class App extends Component {
         this.saveCurrentState();
     }
 
+    loadStateFromStorage(defaultState) {
+        const currentTimestamp = new Date().getTime();
+        const loadedState = StateStorage.load();
+        let state = { ...defaultState };
+
+        for (const key in state) {
+            if (state.hasOwnProperty(key) && state.hasOwnProperty(key)) {
+                state[key] = loadedState[key] || state[key];
+            }
+        }
+
+        state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
+            new Date(departureTime).getTime() < currentTimestamp
+        ));
+
+        return state;
+    }
+
     render() {
         return (
             <Fragment>
@@ -77,7 +99,7 @@ export default class App extends Component {
         return (
             <Tabs
                 id="content-tabs"
-                activeKey={this.state.activeContentTab} 
+                activeKey={this.state.activeContentTab}
                 onSelect={this.handleContentTabSelected}
             >
                 {this.renderSearchTab()}
@@ -92,14 +114,17 @@ export default class App extends Component {
     }
 
     renderSearchTab() {
-        const { arrivalStation, departureStation, watchedRoutes } = this.state;
+        const { arrivalStation, date, departureStation, watchedRoutes } = this.state;
         return (
             <Tab eventKey={1} title="Vyhledávání">
                 <Search
                     arrivalStation={arrivalStation}
+                    date={date}
                     departureStation={departureStation}
                     watchedRoutes={watchedRoutes}
+                    onDateChange={this.handleDateChange}
                     onStationChange={this.handleStationChange}
+                    onStationsSwap={this.handleStationsSwap}
                     onToggleWatchdog={this.handleToggleWatchdog}/>
             </Tab>
         );
@@ -108,7 +133,7 @@ export default class App extends Component {
     renderWatchdogTab() {
         return (
             <Tab eventKey={2} title="Sledované spoje">
-                <Watchdog routes={this.state.watchedRoutes} onUnwatch={null}/>
+                <Watchdog routes={this.state.watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
             </Tab>
         );
     }

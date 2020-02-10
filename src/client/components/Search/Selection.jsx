@@ -8,29 +8,25 @@ import './selection.css';
 const FILTER_FIELDS = ['name', 'fullname', 'country', 'city'];
 
 class Selection extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            date: getUTCISODate(new Date())
-        }
-    }
-
     handleTypeaheadPropChange = (isDeparture, selected) => {
         this.props.onStationChange(isDeparture, selected[0] || null);
     }
 
     handleDateChange = (event) => {
-        this.setState({ date: event.target.value });
+        this.props.onDateChange(event.target.value);
     }
 
     handleSubmit = () => {
-        const { date } = this.state;
-        this.props.onSubmit(date);
+        this.props.onSubmit();
+    }
+
+    handleSwapStations = () => {
+        this.props.onStationsSwap();
     }
 
     render() {
-        const { loading } = this.props;
-
+        const { arrivalStation, date, departureStation, loading } = this.props;
+        const disableSubmit = loading || !departureStation || !arrivalStation;
         return (
             <Grid fluid><Form className="search">
                 <Row>
@@ -38,7 +34,7 @@ class Selection extends Component {
                         <FormControl
                             type="text"
                             onChange={this.handleDateChange}
-                            value={this.state.date}
+                            value={date}
                             placeholder="Datum"
                         />
                     </Col>
@@ -46,13 +42,13 @@ class Selection extends Component {
                         <FormGroup>
                             <InputGroup className="search-inputs">
                                 {this.renderStationInput('Odkud', true)}
-                                {this.renderTransferButton()}
+                                {this.renderSwapStationsButton()}
                                 {this.renderStationInput('Kam', false)}
                             </InputGroup>
                         </FormGroup>
                     </Col>
                     <Col sm={2}>
-                        <Button bsStyle="primary" disabled={loading} onClick={this.handleSubmit}>Vyhledat</Button>
+                        <Button bsStyle="primary" disabled={disableSubmit} onClick={this.handleSubmit}>Vyhledat</Button>
                     </Col>
                 </Row>
             </Form></Grid>
@@ -78,11 +74,11 @@ class Selection extends Component {
             />
         );
     }
-    
-    renderTransferButton() {
+
+    renderSwapStationsButton() {
         return (
             <InputGroup.Button>
-                <Button bsStyle="primary" className="swap-stations" onClick={this.handleStationsTransfer}>
+                <Button bsStyle="primary" className="swap-stations" onClick={this.handleSwapStations}>
                     <Glyphicon glyph="transfer"/>
                 </Button>
             </InputGroup.Button>
