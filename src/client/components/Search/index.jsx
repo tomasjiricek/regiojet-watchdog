@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from 'react';
 
+import loadStations from './loadStations';
 import Selection from './Selection';
 import Results from './Results';
 import request from '../../utils/request';
-
 import { API_URL } from '../../constants';
 
 class Search extends Component {
@@ -12,29 +12,25 @@ class Search extends Component {
         this.state = {
             minDeparture: '00:00',
             maxDeparture: '23:59',
-            loadingDestinations: true,
+            loadingStations: true,
             loadingRoutes: false,
             stations: null,
             routes: null,
         };
-        this.destinationsRequestController = new AbortController();
     }
 
     componentDidMount() {
-        fetch(API_URL.DESTINATIONS, { signal: this.destinationsRequestController.signal })
-            .then((res) => {
-                if (res.status !== 200) {
-                    return;
-                }
-                res.json().then(this.processDestinationsResponse);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        this.loadStationsTimer = setTimeout(this.loadAndProcessStations, 200);
     }
 
     componentWillUnmount() {
-        this.destinationsRequestController.abort();
+        clearTimeout(this.loadStationsTimer);
+
+        if (this.routeSearchAbort instanceof Function) {
+            console.log('abort')
+            this.routeSearchAbort();
+            this.routeSearchAbort = null;
+        }
     }
 
     handleDateChange = (date) => {
@@ -53,12 +49,13 @@ class Search extends Component {
             minDeparture,
             maxDeparture,
             departureStationId: departureStation.id,
-            arrivalStationId: arrivalStation.id,
+            arrivalStationId: arrivalStation.id
         };
 
         this.setState({ loadingRoutes: true });
-
-        request(API_URL.ROUTE_SEARCH, requestQuery)
+        const fetchRequest = request(API_URL.ROUTE_SEARCH, requestQuery);
+        this.routeSearchAbort = fetchRequest.abort;
+        fetchRequest.send()
             .then((res) => {
                 if (res.status !== 200) {
                     return;
@@ -78,18 +75,14 @@ class Search extends Component {
         this.props.onStationsSwap();
     }
 
-    processDestinationsResponse = (res) => {
-        const stations = [];
-        res.data.destinations.forEach((destination) => {
-            destination.cities.forEach((city) => {
-                city.stations.forEach((station) => {
-                    station.country = destination.country;
-                    station.city = city.name;
-                    stations.push(station);
-                });
+    loadAndProcessStations = () => {
+        loadStations()
+            .then((stations) => {
+                this.setState({ stations, loadingStations: false });
+            })
+            .catch((error) => {
+                console.error('Failed to load destinations', error);
             });
-        });
-        this.setState({ stations, loadingDestinations: false });
     }
 
     processSearchResponse = (res) => {
@@ -98,7 +91,7 @@ class Search extends Component {
 
     render() {
         const {
-            loadingDestinations,
+            loadingStations,
             loadingRoutes,
             routes,
             stations,
@@ -106,7 +99,7 @@ class Search extends Component {
 
         const { date, departureStation, arrivalStation } = this.props;
 
-        if (loadingDestinations) {
+        if (loadingStations) {
             return <h3>Načítání...</h3>;
         }
 
