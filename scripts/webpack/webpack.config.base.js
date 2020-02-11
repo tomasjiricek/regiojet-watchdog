@@ -2,18 +2,19 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const DIST_DIR = path.resolve(__dirname, 'dist');
+const ROOT_DIR = path.resolve(__dirname, '../../');
+const DIST_DIR = path.join(ROOT_DIR, 'dist');
+const RES_DIR = path.join(ROOT_DIR, 'res');
 
 module.exports = {
-    devtool: 'source-map',
-    entry: './src/client/index.js',
+    entry: path.join(ROOT_DIR, 'src/client/index.js'),
     output: {
         path: DIST_DIR,
         filename: 'bundle.js'
     },
     plugins: [
-        new HtmlWebpackPlugin({ template: './res/index.html' }),
-        new CopyWebpackPlugin([ { from: './res/', to: DIST_DIR } ])
+        new HtmlWebpackPlugin({ template: path.join(RES_DIR, 'index.html') }),
+        new CopyWebpackPlugin([ { from: RES_DIR, to: DIST_DIR } ])
     ],
     module: {
         rules: [{
@@ -35,7 +36,5 @@ module.exports = {
     },
     resolve: {
         extensions: ['.js', '.jsx', '.css']
-    },
-    mode: 'development',
-    watch: true
+    }
 };
