@@ -4,9 +4,11 @@
     "description": "Seek for connections",
     "main": "src/www.js",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js",
+        "build": "node scripts/build/build.js",
+        "build:dev": "node scripts/build/build.js --env=dev",
         "serve": "node src/www",
-        "start": "echo \"Use npm run build and npm run serve\""
+        "start": "echo \"Use npm run build and npm run serve\"",
+        "webpack": "webpack"
     },
     "author": "",
     "license": "ISC",
