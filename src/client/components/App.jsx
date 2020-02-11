@@ -73,9 +73,11 @@ export default class App extends Component {
         const loadedState = StateStorage.load();
         let state = { ...defaultState };
 
-        for (const key in state) {
-            if (state.hasOwnProperty(key) && loadedState.hasOwnProperty(key)) {
-                state[key] = loadedState[key] || state[key];
+        if (loadedState) {
+            for (const key in state) {
+                if (state.hasOwnProperty(key) && loadedState.hasOwnProperty(key)) {
+                    state[key] = loadedState[key] || state[key];
+                }
             }
         }
 
