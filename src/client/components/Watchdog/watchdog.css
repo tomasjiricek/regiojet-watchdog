@@ -1,0 +1,18 @@
+table.table>tbody>tr.row.route-detail {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+table.table>tbody>tr.row.route-detail>td {
+    border-top: 0;
+    padding: 0;
+}
+tr.row.route-detail .panel {
+    border-width: 1px 0 0 0;
+    margin-bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 0;
+}
+
+tr.row.route-detail:first-child .panel {
+    border-top-width: 0;
+}

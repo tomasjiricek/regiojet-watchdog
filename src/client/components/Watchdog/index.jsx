@@ -1,11 +1,25 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Glyphicon } from 'react-bootstrap';
 
 import { Col, Row, Table } from '../Table';
+import RouteDetails from './RouteDetails';
+
+import './watchdog.css';
 
 export default class Watchdog extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            displayedRouteDetailId: null,
+        };
+    }
+
     handleUnwatch = (route) => {
         this.props.onUnwatch(route);
+    }
+
+    toggleRouteDetailVisibility = (routeId) => {
+        this.setState({ displayedRouteDetailId: this.state.displayedRouteDetailId === routeId ? null : routeId });
     }
 
     render() {
@@ -42,11 +56,25 @@ export default class Watchdog extends Component {
     }
 
     renderTableRow(route) {
+        const { id } = route;
+        const { displayedRouteDetailId } = this.state;
+
+        return (
+            <Fragment key={id}>
+                {displayedRouteDetailId === id
+                    ? this.renderRouteDetailRow(route)
+                    : this.renderBasicRouteInfo(route)
+                }
+            </Fragment>
+        );
+    }
+
+    renderBasicRouteInfo(route) {
         const { id, departureTime, freeSeatsCount, transfersCount, travelTime } = route;
         const date = new Date(departureTime);
 
         return (
-            <Row key={id} className="route">
+            <Row className="route" onClick={this.toggleRouteDetailVisibility.bind(this, id)}>
                 <Col>{`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`}</Col>
                 <Col>{freeSeatsCount}</Col>
                 <Col>{travelTime}</Col>
@@ -60,6 +88,14 @@ export default class Watchdog extends Component {
                 </Col>
             </Row>
         );
+    }
+
+    renderRouteDetailRow(route) {
+        return (
+            <Row className="route-detail" onClick={this.toggleRouteDetailVisibility.bind(this, route.id)}>
+                <Col colSpan={4}><RouteDetails route={route}/></Col>
+            </Row>
+        )
     }
 
     renderRoutes() {

@@ -1,12 +1,12 @@
 {
-    "name": "regiojet-hunter",
-    "version": "0.0.1",
+    "name": "regiojet-watchdog",
+    "version": "0.0.2",
     "description": "Seek for connections",
     "main": "src/www.js",
     "scripts": {
         "build": "webpack --config ./webpack.config.js",
         "serve": "node src/www",
-        "start": "npm run build & npm run serve"
+        "start": "echo \"Use npm run build and npm run serve\""
     },
     "author": "",
     "license": "ISC",

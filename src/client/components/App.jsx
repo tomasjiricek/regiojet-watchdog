@@ -74,13 +74,13 @@ export default class App extends Component {
         let state = { ...defaultState };
 
         for (const key in state) {
-            if (state.hasOwnProperty(key) && state.hasOwnProperty(key)) {
+            if (state.hasOwnProperty(key) && loadedState.hasOwnProperty(key)) {
                 state[key] = loadedState[key] || state[key];
             }
         }
 
         state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
-            new Date(departureTime).getTime() < currentTimestamp
+            new Date(departureTime).getTime() > currentTimestamp
         ));
 
         return state;
