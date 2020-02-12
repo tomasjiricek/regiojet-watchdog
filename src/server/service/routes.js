@@ -44,7 +44,7 @@ apiRouter.get('/route/search', (req, res) => {
 apiRouter.get('/route/:routeId([0-9]+)/detail', (req, res) => {
     res.set('Content-Type', 'application/json');
 
-    const { 
+    const {
         params: { routeId },
         query: { stationIdFrom, stationIdTo }
     } = req;
@@ -67,8 +67,4 @@ apiRouter.get('/route/:routeId([0-9]+)/detail', (req, res) => {
         });
 });
 
-const router = express.Router();
-router.use('/', express.static(path.join(__dirname, '../../../dist')));
-router.use('/api/', apiRouter);
-
-module.exports = router;
+module.exports = apiRouter;
