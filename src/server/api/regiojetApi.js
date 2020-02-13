@@ -63,9 +63,9 @@ function getHttpsRequestPromise(requestOptions, callback) {
     });
 }
 
-function getTrainRoutes(date, departureStationId, arrivalStationId, minDeparture, maxDeparture) {
-    const fromLocation = { id: departureStationId, type: 'STATION' };
-    const toLocation = { id: arrivalStationId, type: 'STATION' };
+function getTrainRoutes(date, departureStationId, departureStationType, arrivalStationId, arrivalStationType, minDeparture, maxDeparture) {
+    const fromLocation = { id: departureStationId, type: departureStationType };
+    const toLocation = { id: arrivalStationId, type: arrivalStationType };
     const minDepartureTime = new Date(`${date}T${minDeparture || '00:00'}${GMT_TIMEZONE}`).getTime();
     const maxDepartureTime = new Date(`${date}T${maxDeparture || '23:59'}${GMT_TIMEZONE}`).getTime();
     const requestOptions = buildRoutesSearchOptions(date, fromLocation, toLocation);
@@ -154,26 +154,6 @@ function buildRoutesSearchOptions(date, locationFrom, locationTo) {
     };
 }
 
-async function getAvailableTrains(date, locationNameFrom, locationNameTo, minDeparture, maxDeparture) {
-    getTrainRoutes(date, locationNameFrom, locationNameTo, minDeparture, maxDeparture)
-        .then((routes) => {
-            routes.forEach(({ id, departureTime, transfersCount, travelTime, departureStationId, arrivalStationId }) => {
-                const departureLocaleTime = new Date(departureTime).toLocaleTimeString();
-                let message = `Departure at ${departureLocaleTime}, ${travelTime}, ${transfersCount} transfers:\n`;
-                getRouteDetails(id, departureStationId, arrivalStationId)
-                    .then(({ freeSeatsCount, priceClasses }) => {
-                        if (freeSeatsCount === 0) {
-                            return;
-                        }                
-                        message += parsePriceClasses(priceClasses);
-                        console.log(message);
-                    })
-                    .catch((err) => console.log('ROUTE ERROR', err));
-            });
-        })
-        .catch((err) => console.log('ERROR', err));
-}
-
 function parsePriceClasses(priceClasses) {
     let message = '';
     priceClasses.forEach((priceClass) => {
@@ -186,7 +166,6 @@ function parsePriceClasses(priceClasses) {
 }
 
 module.exports = {
-    getAvailableTrains,
     getDestinations,
     getTrainRoutes,
     getRouteDetails

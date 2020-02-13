@@ -16,9 +16,16 @@ const processDestinationsResponse = (res) => {
     const stations = [];
     res.data.destinations.forEach((destination) => {
         destination.cities.forEach((city) => {
+            city.city = city.name;
+            city.country = destination.country;
+            city.fullname = city.name;
+            city.isCity = true;
+            stations.push({ ...city, stations: null })
             city.stations.forEach((station) => {
                 station.country = destination.country;
+                station.cityId = city.id;
                 station.city = city.name;
+                station.isCity = false;
                 stations.push(station);
             });
         });

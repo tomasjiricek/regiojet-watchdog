@@ -26,16 +26,16 @@ apiRouter.get('/destinations', (_, res) => {
 apiRouter.get('/route/search', (req, res) => {
     res.set('Content-Type', 'application/json');
 
-    const { departureStationId, arrivalStationId } = req.query;
+    const { departureStationId, departureStationType, arrivalStationId, arrivalStationType } = req.query;
     let { date, minDeparture, maxDeparture } = req.query;
 
-    if (!departureStationId || !arrivalStationId) {
-        return _sendError(res, 'Missing mandatory params: departureStationId, arrivalStationId');
+    if (!departureStationId || !arrivalStationId || !departureStationType || !arrivalStationType) {
+        return _sendError(res, 'Missing mandatory params: departureStationId, departureStationType, arrivalStationId, arrivalStationType');
     }
 
     date = date || new Date().toISOString().split('T')[0];
 
-    getTrainRoutes(date, departureStationId, arrivalStationId, minDeparture, maxDeparture)
+    getTrainRoutes(date, departureStationId, departureStationType, arrivalStationId, arrivalStationType, minDeparture, maxDeparture)
         .then((data) => res.status(200).send({ status: 'OK', data }))
         .catch((error) => _sendError(res, { statusCode: 500, error }));
 

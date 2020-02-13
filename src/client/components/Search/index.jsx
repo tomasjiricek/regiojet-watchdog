@@ -49,7 +49,9 @@ class Search extends Component {
             minDeparture,
             maxDeparture,
             departureStationId: departureStation.id,
-            arrivalStationId: arrivalStation.id
+            departureStationType: departureStation.isCity ? 'CITY' : 'STATION',
+            arrivalStationId: arrivalStation.id,
+            arrivalStationType: arrivalStation.isCity ? 'CITY' : 'STATION',
         };
 
         this.setState({ loadingRoutes: true });
