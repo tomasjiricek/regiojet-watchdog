@@ -10,7 +10,7 @@ module.exports = {
     entry: path.join(ROOT_DIR, 'src/client/index.js'),
     output: {
         path: DIST_DIR,
-        filename: 'bundle.js'
+        filename: '[name].[contenthash].js',
     },
     plugins: [
         new HtmlWebpackPlugin({ template: path.join(RES_DIR, 'index.html') }),
