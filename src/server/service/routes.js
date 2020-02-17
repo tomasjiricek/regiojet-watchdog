@@ -1,9 +1,13 @@
+const crypto = require('crypto');
 const express = require('express');
-const path = require('path');
 
 const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/regiojetApi');
 
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
+
+function getRandomDeviceId() {
+    return Promise.resolve(crypto.randomBytes(32).toString('hex'));
+}
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {
@@ -18,6 +22,14 @@ const apiRouter = express.Router();
 apiRouter.get('/destinations', (_, res) => {
     res.set('Content-Type', 'application/json');
     getDestinations()
+        .then((data) => res.status(200).send({ status: 'OK', data }))
+        .catch((error) => _sendError(res, { statusCode: 500, error }));
+
+});
+
+apiRouter.get('/device-id', (_, res) => {
+    res.set('Content-Type', 'application/json');
+    getRandomDeviceId()
         .then((data) => res.status(200).send({ status: 'OK', data }))
         .catch((error) => _sendError(res, { statusCode: 500, error }));
 
