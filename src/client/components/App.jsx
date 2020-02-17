@@ -27,7 +27,7 @@ export default class App extends Component {
         window.addEventListener('beforeunload', this.handleWindowUnload);
         this.stateSaveInterval = setInterval(this.saveCurrentState, 10000);
         if (this.state.deviceId === null) {
-            fetchAndSaveDeviceId();
+            this.fetchAndSaveDeviceId();
         }
     }
 
