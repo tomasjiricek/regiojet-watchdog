@@ -18,6 +18,7 @@ export default class App extends Component {
             watchedRoutes: [],
             arrivalStation: null,
             departureStation: null,
+            deviceId: null,
         };
         this.state = this.loadStateFromStorage(defaultState);
     }
@@ -25,11 +26,25 @@ export default class App extends Component {
     componentDidMount() {
         window.addEventListener('beforeunload', this.handleWindowUnload);
         this.stateSaveInterval = setInterval(this.saveCurrentState, 10000);
+        if (this.state.deviceId === null) {
+            fetchAndSaveDeviceId();
+        }
     }
 
     componentWillUnmount() {
         window.removeEventListener('beforeunload', this.handleWindowUnload);
         clearInterval(this.stateSaveInterval);
+    }
+
+    fetchAndSaveDeviceId = async() => {
+        try {
+            const deviceIdResponse = await fetch('/api/device-id');
+            const deviceId = await deviceIdResponse.json();
+            this.setState({ deviceId });
+        } catch (e) {
+            console.error(e);
+            setTimeout(this.fetchAndSaveDeviceId, 5000);
+        }
     }
 
     handleDateChange = (date) => {
