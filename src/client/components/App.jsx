@@ -39,8 +39,8 @@ export default class App extends Component {
     fetchAndSaveDeviceId = async() => {
         try {
             const deviceIdResponse = await fetch('/api/device-id');
-            const deviceId = await deviceIdResponse.json();
-            this.setState({ deviceId });
+            const deviceIdJson = await deviceIdResponse.json();
+            this.setState({ deviceId: deviceIdJson.data });
         } catch (e) {
             console.error(e);
             setTimeout(this.fetchAndSaveDeviceId, 5000);
