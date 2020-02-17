@@ -6,7 +6,7 @@ const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/reg
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
 
 function getRandomDeviceId() {
-    return Promise.resolve(crypto.randomBytes(32).toString('hex'));
+    return Promise.resolve(crypto.randomBytes(35).toString('base64').replace(/[^a-z0-9]/gi, ''));
 }
 
 function _sendError(response, data) {
