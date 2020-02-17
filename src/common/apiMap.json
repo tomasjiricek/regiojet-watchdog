@@ -1,0 +1,40 @@
+[
+    {
+        "name": "destinations",
+        "urlTemplate": "https://www.studentagency.cz/shared/wc/ybus-form/destinations-cs.json",
+        "options": {
+            "urlArguments": [],
+            "query": []
+        }
+    },
+    {
+        "name": "routeSearch",
+        "urlTemplate": "https://brn-ybus-pubapi.sa.cz/restapi/routes/search/simple",
+        "options": {
+            "urlArguments": [],
+            "query": [
+                "departureDate",
+                "tariffs",
+                "fromLocationId",
+                "fromLocationType",
+                "toLocationId",
+                "toLocationType"
+            ]
+        }
+    },
+    {
+        "name": "routeDetail",
+        "urlTemplate": "https://brn-ybus-pubapi.sa.cz/restapi/routes/${routeId}/simple",
+        "options": {
+            "urlArguments": [
+                "routeId"
+            ],
+            "query": [
+                "fromStationId",
+                "toStationId",
+                "routeId",
+                "tariffs"
+            ]
+        }
+    }
+]
