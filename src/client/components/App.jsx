@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { PageHeader, Tab, Tabs } from 'react-bootstrap';
 
 import About from './About';
+import Login from './Login';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
 import Watchdog from './Watchdog';
@@ -107,8 +108,15 @@ export default class App extends Component {
         return (
             <Fragment>
                 <PageHeader style={{ marginLeft: '20px' }}>RegioJet vyhledávač</PageHeader>
+                {this.renderLogin()}
                 {this.renderContentTabs()}
             </Fragment>
+        );
+    }
+
+    renderLogin() {
+        return (
+            <Login/>
         );
     }
 
