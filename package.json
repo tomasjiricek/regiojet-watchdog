@@ -7,6 +7,7 @@
         "build": "node scripts/build/build.js",
         "build:dev": "node scripts/build/build.js --env=dev",
         "serve": "node src/www",
+        "serve:dev": "node src/www --devmode",
         "start": "echo \"Use npm run build and npm run serve\"",
         "webpack": "webpack"
     },

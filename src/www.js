@@ -27,6 +27,12 @@ argv.option([
         type: 'number',
         description: 'Optional port. If is not set, service will start at port from config.',
         example: 'node www --port=12345'
+    }, {
+        name: 'devmode',
+        short: 'd',
+        type: 'boolean',
+        description: 'Optional. If passed, Express.js will host static files too.',
+        example: 'node www -d'
     }
 ]);
 
@@ -46,10 +52,10 @@ if (config) {
     const port = args.port || config.listenOnPort || 3333;
 
     try {
-        service.initApp(config);
+        service.initApp(args.devmode);
         const server = https.createServer({ key: privateKey, cert: certificate }, service.app);
         server.listen(port);
-        console.log(colors.cyan('\t---- Service is running ----'));
+        console.log(colors.cyan(`\t---- Service is running ${args.devmode ? '(in dev mode) ' : ''}----`));
         console.log(colors.green(`\n\tURL: https://localhost:${port}`));
     } catch (e) {
        console.log(colors.red('Error:', e.message));

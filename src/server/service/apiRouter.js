@@ -17,9 +17,9 @@ function _sendError(response, data) {
     response.status(data.statusCode).send({ status: 'ERROR', data });
 }
 
-const apiRouter = express.Router();
+const router = express.Router();
 
-apiRouter.get('/destinations', (_, res) => {
+router.get('/destinations', (_, res) => {
     res.set('Content-Type', 'application/json');
     getDestinations()
         .then((data) => res.status(200).send({ status: 'OK', data }))
@@ -27,7 +27,7 @@ apiRouter.get('/destinations', (_, res) => {
 
 });
 
-apiRouter.get('/device-id', (_, res) => {
+router.get('/device-id', (_, res) => {
     res.set('Content-Type', 'application/json');
     getRandomDeviceId()
         .then((data) => res.status(200).send({ status: 'OK', data }))
@@ -35,7 +35,7 @@ apiRouter.get('/device-id', (_, res) => {
 
 });
 
-apiRouter.get('/route/search', (req, res) => {
+router.get('/route/search', (req, res) => {
     res.set('Content-Type', 'application/json');
 
     const { departureStationId, departureStationType, arrivalStationId, arrivalStationType } = req.query;
@@ -53,7 +53,7 @@ apiRouter.get('/route/search', (req, res) => {
 
 });
 
-apiRouter.get('/route/:routeId([0-9]+)/detail', (req, res) => {
+router.get('/route/:routeId([0-9]+)/detail', (req, res) => {
     res.set('Content-Type', 'application/json');
 
     const {
@@ -79,4 +79,4 @@ apiRouter.get('/route/:routeId([0-9]+)/detail', (req, res) => {
         });
 });
 
-module.exports = apiRouter;
+module.exports = router;
