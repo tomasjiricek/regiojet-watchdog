@@ -37,18 +37,13 @@ export default class KnockCodeGrid extends Component {
     }
     
     render() {
-        return (
-            <div className="knock-code-grid">
-                {this.renderGrid()}
-            </div>
-        );
+        return this.renderGrid();
     }
 
     renderGrid() {
         const { size } = this.props;
         const rows = [];
         const percentageSize = (100 / size) + '%';
-        const tableSize = '200px';
         const colStyle = { 
             width: percentageSize,
             height: percentageSize,
@@ -67,7 +62,7 @@ export default class KnockCodeGrid extends Component {
         }
 
         return (
-            <table style={{ width: tableSize, height: tableSize }}>
+            <table className="knock-code-grid">
                 <tbody>{rows}</tbody>
             </table>
         );

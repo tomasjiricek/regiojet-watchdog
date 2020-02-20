@@ -1,6 +1,8 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import GridSizePicker from './GridSizePicker';
 import KnockCodeGrid from './KnockCodeGrid';
+
+import './login.css';
 
 const AVAILABLE_GRID_SIZES = [2, 3, 4];
 const MIN_PATTERN_LENGTH_BASE = 6;
@@ -56,10 +58,10 @@ export default class Login extends Component {
     render() {
         const { gridSize } = this.state;
         return (
-            <Fragment>
+            <div className="login">
                 <GridSizePicker size={gridSize} sizes={AVAILABLE_GRID_SIZES} onChange={this.handleGridSizeChange} />
                 <KnockCodeGrid size={gridSize} onSubmit={this.handleLoginPatternSubmit} />
-            </Fragment>
+            </div>
         );
     }
 }
