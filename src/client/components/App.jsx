@@ -3,32 +3,47 @@ import { PageHeader, Tab, Tabs } from 'react-bootstrap';
 
 import About from './About';
 import Login from './Login';
+import MasterLogin from './MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
 import Watchdog from './Watchdog';
 import { getUTCISODate } from '../utils/date';
+import request from '../utils/request';
 
 import './app.css';
+
+const PERSISTENT_STATE_ITEMS = [
+    'activeContentTab',
+    'arrivalStation',
+    'departureStation',
+    'deviceId',
+    'watchedRoutes',
+]
 
 export default class App extends Component {
     constructor(props) {
         super(props);
-        const defaultState = {
+        const loadedState = this.loadStateFromStorage();
+        this.state = {
             activeContentTab: 1,
             date: getUTCISODate(new Date()),
             watchedRoutes: [],
             arrivalStation: null,
             departureStation: null,
             deviceId: null,
+            isAuthorized: false,
+            isCheckingAuthorization: true,
+            ...loadedState,
         };
-        this.state = this.loadStateFromStorage(defaultState);
     }
 
     componentDidMount() {
         window.addEventListener('beforeunload', this.handleWindowUnload);
-        this.stateSaveInterval = setInterval(this.saveCurrentState, 10000);
+        this.stateSaveInterval = setInterval(this.saveCurrentState, 20000);
         if (this.state.deviceId === null) {
             this.fetchAndSaveDeviceId();
+        } else {
+            this.checkDeviceIdIsAuthorized();
         }
     }
 
@@ -48,12 +63,29 @@ export default class App extends Component {
         }
     }
 
+    checkDeviceIdIsAuthorized() {
+        const { deviceId } = this.state;
+        request('/api/is-authorized', { deviceId })
+            .send()
+            .then((res) => res.json())
+            .then((res) => {
+                this.setState({ isCheckingAuthorization: false, isAuthorized: res.data.authorized });
+            })
+            .catch(() => {
+                // Request failed
+            })
+    }
+
     handleDateChange = (date) => {
         this.setState({ date });
     }
 
     handleContentTabSelected = (selectedKey) => {
         this.setState({ activeContentTab: selectedKey });
+    }
+
+    handleMasterLoginAuthorize = () => {
+        this.setState({ isAuthorized: true });
     }
 
     handleStationChange = (isDeparture, station) => {
@@ -84,40 +116,53 @@ export default class App extends Component {
         this.saveCurrentState();
     }
 
-    loadStateFromStorage(defaultState) {
+    loadStateFromStorage() {
         const currentTimestamp = new Date().getTime();
         const loadedState = StateStorage.load();
-        let state = { ...defaultState };
+        let state = {};
 
         if (loadedState) {
-            for (const key in state) {
-                if (state.hasOwnProperty(key) && loadedState.hasOwnProperty(key)) {
-                    state[key] = loadedState[key] || state[key];
+            PERSISTENT_STATE_ITEMS.forEach((key) => {
+                if (loadedState.hasOwnProperty(key)) {
+                    state[key] = loadedState[key];
                 }
-            }
+            });
         }
 
-        state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
-            new Date(departureTime).getTime() > currentTimestamp
-        ));
+        if (state.watchedRoutes instanceof Array) {
+            state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
+                new Date(departureTime).getTime() > currentTimestamp
+            ));
+        }
 
         return state;
     }
 
     render() {
+        const { deviceId, isAuthorized, isCheckingAuthorization } = this.state;
+
+        if (deviceId === null || isCheckingAuthorization) {
+            return this.renderPageHeader('Načítání...');
+        }
+
+        if (!isAuthorized) {
+            return this.renderMasterLogin();
+        }
+
         return (
             <Fragment>
-                <PageHeader style={{ marginLeft: '20px' }}>RegioJet vyhledávač</PageHeader>
-                {this.renderLogin()}
+                {this.renderPageHeader('RegioJet vyhledávač')}
                 {this.renderContentTabs()}
             </Fragment>
         );
     }
 
-    renderLogin() {
-        return (
-            <Login/>
-        );
+    renderPageHeader(title) {
+        return <PageHeader style={{ marginLeft: '20px' }}>{title}</PageHeader>
+    }
+
+    renderMasterLogin() {
+        return <MasterLogin deviceId={this.state.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
     }
 
     renderContentTabs() {
@@ -164,6 +209,10 @@ export default class App extends Component {
     }
 
     saveCurrentState = () => {
-        StateStorage.save(this.state);
+        let state = {};
+        PERSISTENT_STATE_ITEMS.forEach((item) => {
+            state[item] = this.state[item];
+        });
+        StateStorage.save(state);
     }
 }
