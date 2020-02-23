@@ -19,13 +19,11 @@ export default class MasterLogin extends Component {
     }
 
     handleAuthorized = (data) => {
-        console.log(data);
         this.setState({ status: AUTH_STATUS.AUTHORIZED });
         this.props.onAuthorize();
     }
 
     handleFailed = (data) => {
-        console.log(data);
         this.setState({ password: '', status: AUTH_STATUS.FAILED });
     }
 
