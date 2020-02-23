@@ -151,7 +151,7 @@ export default class App extends Component {
 
         return (
             <Fragment>
-                {this.renderPageHeader('RegioJet vyhledávač')}
+                {this.renderPageHeader('RegioJet hlídač')}
                 {this.renderContentTabs()}
             </Fragment>
         );
