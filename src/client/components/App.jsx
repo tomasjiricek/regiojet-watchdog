@@ -152,7 +152,6 @@ export default class App extends Component {
 
         return (
             <Fragment>
-                <SecurityImages/>
                 {this.renderPageHeader('RegioJet hlídač')}
                 {this.renderContentTabs()}
             </Fragment>
