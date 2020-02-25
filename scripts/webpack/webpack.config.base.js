@@ -14,9 +14,15 @@ module.exports = {
         filename: '[name].[contenthash].js',
     },
     plugins: [
-        new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
         new HtmlWebpackPlugin({ template: path.join(RES_DIR, 'index.html') }),
-        new CopyWebpackPlugin([ { from: RES_DIR, to: DIST_DIR } ])
+        new CopyWebpackPlugin([{
+            test: /\.(png|svg|jpe?g|gif)$/,
+            from: RES_DIR,
+            to: DIST_DIR 
+        }]),
+        new CleanWebpackPlugin({
+            cleanAfterEveryBuildPatterns: ['!static/**']
+        })
     ],
     module: {
         rules: [{
@@ -37,6 +43,6 @@ module.exports = {
         }]
     },
     resolve: {
-        extensions: ['.js', '.jsx', '.css']
+        extensions: ['.js', '.jsx', '.json', '.css', '.png', '.jpg']
     }
 };
