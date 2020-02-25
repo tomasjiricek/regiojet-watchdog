@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { PageHeader, Tab, Tabs } from 'react-bootstrap';
 
 import About from './About';
-import Login from './Login';
+import KnockCode from './KnockCode';
 import MasterLogin from './MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
@@ -11,6 +11,7 @@ import { getUTCISODate } from '../utils/date';
 import request from '../utils/request';
 
 import './app.css';
+import SecurityImages from './SecurityImages';
 
 const PERSISTENT_STATE_ITEMS = [
     'activeContentTab',
@@ -151,6 +152,7 @@ export default class App extends Component {
 
         return (
             <Fragment>
+                <SecurityImages/>
                 {this.renderPageHeader('RegioJet hlídač')}
                 {this.renderContentTabs()}
             </Fragment>

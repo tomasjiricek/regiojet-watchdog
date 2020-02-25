@@ -35,7 +35,7 @@ export default class KnockCodeGrid extends Component {
         clearTimeout(this.combinationSubmitTimer);
         this.combinationSubmitTimer = null;
     }
-    
+
     render() {
         return this.renderGrid();
     }

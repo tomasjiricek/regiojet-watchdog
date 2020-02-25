@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import GridSizePicker from './GridSizePicker';
 import KnockCodeGrid from './KnockCodeGrid';
 
-import './login.css';
+import './knockCode.css';
 
 const AVAILABLE_GRID_SIZES = [2, 3, 4];
 const MIN_PATTERN_LENGTH_BASE = 6;
@@ -31,7 +31,7 @@ function isPatternStrong(size, pattern) {
 }
 
 
-export default class Login extends Component {
+export default class KnockCode extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -58,7 +58,7 @@ export default class Login extends Component {
     render() {
         const { gridSize } = this.state;
         return (
-            <div className="login">
+            <div className="knock-code">
                 <GridSizePicker size={gridSize} sizes={AVAILABLE_GRID_SIZES} onChange={this.handleGridSizeChange} />
                 <KnockCodeGrid size={gridSize} onSubmit={this.handleLoginPatternSubmit} />
             </div>

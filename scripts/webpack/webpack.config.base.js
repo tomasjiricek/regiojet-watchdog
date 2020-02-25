@@ -14,7 +14,7 @@ module.exports = {
         filename: '[name].[contenthash].js',
     },
     plugins: [
-        new CleanWebpackPlugin(),
+        new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
         new HtmlWebpackPlugin({ template: path.join(RES_DIR, 'index.html') }),
         new CopyWebpackPlugin([ { from: RES_DIR, to: DIST_DIR } ])
     ],

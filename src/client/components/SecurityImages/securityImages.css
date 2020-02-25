@@ -1,0 +1,9 @@
+
+.security-images .security-image {
+    display: inline-block;
+    width: 85px;
+    height: 50px;
+    margin: 10px;
+    background-size: 1445px 100px;
+    background-image: url(/images/security-images.jpg);
+}
