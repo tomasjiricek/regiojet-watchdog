@@ -185,26 +185,33 @@ export default class App extends Component {
     }
 
     renderSearchTab() {
-        const { arrivalStation, date, departureStation, watchedRoutes } = this.state;
+        const { arrivalStation, date, departureStation, deviceId, watchedRoutes } = this.state;
         return (
             <Tab eventKey={1} title="Vyhledávání">
                 <Search
                     arrivalStation={arrivalStation}
                     date={date}
                     departureStation={departureStation}
+                    deviceId={deviceId}
                     watchedRoutes={watchedRoutes}
                     onDateChange={this.handleDateChange}
                     onStationChange={this.handleStationChange}
                     onStationsSwap={this.handleStationsSwap}
-                    onToggleWatchdog={this.handleToggleWatchdog}/>
+                    onToggleWatchdog={this.handleToggleWatchdog}
+                />
             </Tab>
         );
     }
 
     renderWatchdogTab() {
+        const { deviceId, watchedRoutes } = this.state;
         return (
             <Tab eventKey={2} title="Sledované spoje">
-                <Watchdog routes={this.state.watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
+                <Watchdog
+                    deviceId={deviceId}
+                    routes={watchedRoutes}
+                    onUnwatch={this.handleToggleWatchdog}
+                />
             </Tab>
         );
     }
