@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, FormControl, Modal } from 'react-bootstrap';
-import request from '../../utils/request';
+import request from '../../../utils/request';
 
 const AUTH_STATUS = {
     AUTHORIZED: 'authorized',

@@ -2,8 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { PageHeader, Tab, Tabs } from 'react-bootstrap';
 
 import About from './About';
-import KnockCode from './KnockCode';
-import MasterLogin from './MasterLogin';
+import MasterLogin from './Login/MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
 import Watchdog from './Watchdog';
@@ -11,7 +10,7 @@ import { getUTCISODate } from '../utils/date';
 import request from '../utils/request';
 
 import './app.css';
-import SecurityImages from './SecurityImages';
+import UserLogin from './Login/UserLogin';
 
 const PERSISTENT_STATE_ITEMS = [
     'activeContentTab',
@@ -89,6 +88,10 @@ export default class App extends Component {
         this.setState({ isAuthorized: true });
     }
 
+    handleUserLoginSubmit = (securityImageIndex, knockCode) => {
+        console.log(securityImageIndex, knockCode);
+    }
+
     handleStationChange = (isDeparture, station) => {
         if (isDeparture) {
             this.setState({ departureStation: station });
@@ -147,7 +150,7 @@ export default class App extends Component {
         }
 
         if (!isAuthorized) {
-            return this.renderMasterLogin();
+            return this.renderUserLogin(); // this.renderMasterLogin();
         }
 
         return (
@@ -164,6 +167,10 @@ export default class App extends Component {
 
     renderMasterLogin() {
         return <MasterLogin deviceId={this.state.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
+    }
+
+    renderUserLogin() {
+        return <UserLogin onLoginSubmit={this.handleUserLoginSubmit} />;
     }
 
     renderContentTabs() {

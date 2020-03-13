@@ -51,8 +51,7 @@ export default class KnockCode extends Component {
 
         const encryptedData = window.btoa(JSON.stringify({ [Math.random()]: null, size, pattern }));
 
-        // do BE request to get data for given pattern
-        console.log(encryptedData);
+        this.props.onSubmit(encryptedData);
     }
 
     render() {
