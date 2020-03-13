@@ -49,3 +49,7 @@ tr.route .tools a:hover {
 #content-tabs>ul.nav-tabs {
     border-color: #cea606;
 }
+
+.page-header {
+    margin-left: 20px;
+}

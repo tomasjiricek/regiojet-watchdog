@@ -162,7 +162,7 @@ export default class App extends Component {
     }
 
     renderPageHeader(title) {
-        return <PageHeader style={{ marginLeft: '20px' }}>{title}</PageHeader>
+        return <PageHeader>{title}</PageHeader>
     }
 
     renderMasterLogin() {

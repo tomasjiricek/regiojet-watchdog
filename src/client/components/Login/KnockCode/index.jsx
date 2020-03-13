@@ -5,6 +5,7 @@ import KnockCodeGrid from './KnockCodeGrid';
 import './knockCode.css';
 
 const AVAILABLE_GRID_SIZES = [2, 3, 4];
+const ERROR_MESSAGE_TIMEOUT = 6000;
 const MIN_PATTERN_LENGTH_BASE = 6;
 const MIN_PATTERN_TILES_COUNT_BASE = 3;
 
@@ -34,7 +35,9 @@ function isPatternStrong(size, pattern) {
 export default class KnockCode extends Component {
     constructor(props) {
         super(props);
+        this.errorMessageTimer = null;
         this.state = {
+            errorMessage: null,
             gridSize: 3,
         };
     }
@@ -45,7 +48,7 @@ export default class KnockCode extends Component {
 
     handleLoginPatternSubmit = (size, pattern) => {
         if (!isPatternStrong(size, pattern)) {
-            console.error('Login pattern is too weak.');
+            this.setErrorMessage('Přihlašovací vzor je příliš slabý!');
             return;
         }
 
@@ -55,12 +58,27 @@ export default class KnockCode extends Component {
     }
 
     render() {
-        const { gridSize } = this.state;
+        const { errorMessage, gridSize } = this.state;
         return (
             <div className="knock-code">
                 <GridSizePicker size={gridSize} sizes={AVAILABLE_GRID_SIZES} onChange={this.handleGridSizeChange} />
                 <KnockCodeGrid size={gridSize} onSubmit={this.handleLoginPatternSubmit} />
+                {errorMessage && <div className="error-message">{errorMessage}</div>}
             </div>
         );
+    }
+
+    clearErrorMessage = () => {
+        this.setState({ errorMessage: null });
+        clearTimeout(this.errorMessageTimer);
+        this.errorMessageTimer = null;
+    }
+
+    setErrorMessage(errorMessage) {
+        if (this.errorMessageTimer !== null) {
+            clearTimeout(this.errorMessageTimer);
+        }
+        this.setState({ errorMessage });
+        this.errorMessageTimer = setTimeout(this.clearErrorMessage, ERROR_MESSAGE_TIMEOUT);
     }
 }

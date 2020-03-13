@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button, PageHeader } from 'react-bootstrap';
 
 import './securityImages.css';
 
@@ -9,16 +10,29 @@ const IMAGE_SIZE = {
     height: 50
 };
 
-const imagesRowsCount = Math.ceil(IMAGES_COUNT / IMAGES_COLUMNS_COUNT);
-
 export default class SecurityImages extends Component {
-    handleImageClick = (index) => {
-        this.props.onSubmit(index);
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedImageIndex: null
+        };
     }
+
+    handleImageClick = (selectedImageIndex, event) => {
+        this.setState({ selectedImageIndex });
+        event.preventDefault();
+    }
+
+    handleSubmit = () => {
+        this.props.onSubmit(this.state.selectedImageIndex);
+    }
+
     render() {
         return (
             <div className="security-images">
+                <PageHeader>Vyberte bezpečnostní obrázek</PageHeader>
                 {this.renderImages()}
+                {this.renderSubmitButton()}
             </div>
         );
     }
@@ -40,14 +54,26 @@ export default class SecurityImages extends Component {
 
     renderImage(index, row, col) {
         const { height, width } = IMAGE_SIZE;
+        const { selectedImageIndex } = this.state;
+        const className = 'security-image' + (index === selectedImageIndex ? ' selected' : '');
 
         return (
-            <div
+            <a
+                href=""
                 key={`r${row}c${col}`}
-                className="security-image"
+                className={className}
                 style={{ backgroundPosition: `${col * width}px ${row * height}px` }}
                 onClick={this.handleImageClick.bind(this, index)}
             />
+        );
+    }
+
+    renderSubmitButton() {
+        const disabled = this.state.selectedImageIndex === null;
+        return (
+            <div className="security-image-submit">
+                <Button bsStyle="primary" disabled={disabled} onClick={this.handleSubmit}>Potvrdit</Button>
+            </div>
         );
     }
 }

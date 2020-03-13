@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { PageHeader } from 'react-bootstrap';
+
 import KnockCode from '../KnockCode';
 import SecurityImages from '../SecurityImages';
 
@@ -32,7 +34,7 @@ export default class Login extends Component {
         const { selectedImage, submitted } = this.state;
 
         if (submitted) {
-            return <h3>Přihlašování...</h3>
+            return <PageHeader>Přihlašování...</PageHeader>
         }
 
         return (
