@@ -1,13 +1,9 @@
-const crypto = require('crypto');
 const express = require('express');
 
 const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/regiojetApi');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
 const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../masterLogin');
-
-function getRandomDeviceId() {
-    return Promise.resolve(crypto.randomBytes(35).toString('base64').replace(/[^a-z0-9]/gi, ''));
-}
+const { getUserByAuthData, registerUser } = require('../userLogin');
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {
@@ -19,6 +15,45 @@ function _sendError(response, data) {
 
 const router = express.Router();
 router.use(express.json());
+
+router.post('/user-login', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body } = req;
+
+    try {
+        const decodedData = Buffer.from(body.token, 'base64');
+        const authData = JSON.parse(decodedData.toString());
+        console.log(authData);
+
+        getUserByAuthData(authData)
+            .then((data) => {
+                res.status(200).send({ status: 'OK', data });
+            })
+            .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
+
+    } catch(_) {
+        return _sendError(res, { statusCode: 500, error: { message: 'Invalid data structure' } })
+    }
+});
+
+router.post('/user-register', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body } = req;
+
+    try {
+        const decodedData = Buffer.from(body.token, 'base64');
+        const authData = JSON.parse(decodedData.toString());
+
+        registerUser(authData)
+            .then((data) => {
+                res.status(200).send({ status: 'OK', data });
+            })
+            .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
+
+    } catch(_) {
+        return _sendError(res, { statusCode: 500, error: { message: 'Invalid data structure' } })
+    }
+});
 
 router.post('/master-login', (req, res) => {
     res.set('Content-Type', 'application/json');

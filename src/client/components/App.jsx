@@ -88,8 +88,8 @@ export default class App extends Component {
         this.setState({ isAuthorized: true });
     }
 
-    handleUserLoginSubmit = (securityImageIndex, knockCode) => {
-        console.log(securityImageIndex, knockCode);
+    handleUserLoggedIn = (userData) => {
+        console.log(userData);
     }
 
     handleStationChange = (isDeparture, station) => {
@@ -170,7 +170,7 @@ export default class App extends Component {
     }
 
     renderUserLogin() {
-        return <UserLogin onLoginSubmit={this.handleUserLoginSubmit} />;
+        return <UserLogin onLoggedIn={this.handleUserLoggedIn} />;
     }
 
     renderContentTabs() {

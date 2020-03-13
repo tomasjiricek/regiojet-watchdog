@@ -17,16 +17,16 @@ export default class Login extends Component {
         this.setState({ selectedImage: imageIndex });
     }
 
-    handleKnockCodeSubmit = (knockCode) => {
+    handleKnockCodeSubmit = (knockCodeData) => {
         if (this.state.submitted) {
             return;
         }
 
-        this.submit(knockCode);
+        this.submit(knockCodeData);
     }
 
-    submit(knockCode) {
-        this.props.onSubmit(this.state.selectedImage, knockCode);
+    submit(knockCodeData) {
+        this.props.onSubmit(this.state.selectedImage, knockCodeData);
         this.setState({ submitted: true });
     }
 

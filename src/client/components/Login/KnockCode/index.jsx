@@ -52,9 +52,7 @@ export default class KnockCode extends Component {
             return;
         }
 
-        const encryptedData = window.btoa(JSON.stringify({ [Math.random()]: null, size, pattern }));
-
-        this.props.onSubmit(encryptedData);
+        this.props.onSubmit({ size, pattern });
     }
 
     render() {
