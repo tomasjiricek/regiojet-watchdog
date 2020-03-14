@@ -1,0 +1,16 @@
+.knock-code {
+    margin: 20px;
+}
+
+.knock-code .knock-code-grid {
+    width: 200px;
+    height: 200px;
+}
+
+.knock-code-grid td:hover {
+    background-color: #eee;
+}
+
+.knock-code-grid td:active {
+    background-color: #ccc;
+}

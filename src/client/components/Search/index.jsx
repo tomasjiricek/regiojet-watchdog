@@ -42,16 +42,17 @@ class Search extends Component {
     }
 
     handleSearchSubmit = () => {
-        const { date, departureStation, arrivalStation } = this.props;
+        const { arrivalStation, date, departureStation, deviceId } = this.props;
         const { minDeparture, maxDeparture } = this.state;
         const requestQuery = {
-            date,
-            minDeparture,
-            maxDeparture,
-            departureStationId: departureStation.id,
-            departureStationType: departureStation.isCity ? 'CITY' : 'STATION',
             arrivalStationId: arrivalStation.id,
             arrivalStationType: arrivalStation.isCity ? 'CITY' : 'STATION',
+            date,
+            departureStationId: departureStation.id,
+            departureStationType: departureStation.isCity ? 'CITY' : 'STATION',
+            deviceId,
+            minDeparture,
+            maxDeparture,
         };
 
         this.setState({ loadingRoutes: true });
@@ -78,7 +79,7 @@ class Search extends Component {
     }
 
     loadAndProcessStations = () => {
-        loadStations()
+        loadStations(this.props.deviceId)
             .then((stations) => {
                 this.setState({ stations, loadingStations: false });
             })

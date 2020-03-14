@@ -6,10 +6,20 @@ const request = (pathName, query) => {
             url.searchParams.append(key, query[key]);
         });
     }
-    return {
+    let defaultOptions = { signal: controller.signal };
+    const api = {
         abort: () => controller.abort(),
-        send: (fetchOptions) => fetch(url, { ...fetchOptions, signal: controller.signal })
+        usePost: (contentType = 'application/json') => {
+            defaultOptions.method = 'POST';
+            defaultOptions.headers = {
+                'Content-Type': contentType
+            };
+            return api;
+        },
+        send: (fetchOptions) => fetch(url, { ...fetchOptions, ...defaultOptions }),
     };
+
+    return api;
 }
 
 export default request;

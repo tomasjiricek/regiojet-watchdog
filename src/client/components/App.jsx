@@ -2,32 +2,55 @@ import React, { Component, Fragment } from 'react';
 import { PageHeader, Tab, Tabs } from 'react-bootstrap';
 
 import About from './About';
+import MasterLogin from './Login/MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
+import UserLogin from './Login/UserLogin';
 import Watchdog from './Watchdog';
+
 import { getUTCISODate } from '../utils/date';
+import request from '../utils/request';
 
 import './app.css';
+
+const PERSISTENT_STATE_ITEMS = [
+    'activeContentTab',
+    'arrivalStation',
+    'departureStation',
+    'watchedRoutes',
+    'userData',
+]
 
 export default class App extends Component {
     constructor(props) {
         super(props);
-        const defaultState = {
+        const loadedState = this.loadStateFromStorage();
+        this.state = {
             activeContentTab: 1,
             date: getUTCISODate(new Date()),
             watchedRoutes: [],
             arrivalStation: null,
             departureStation: null,
-            deviceId: null,
+            isAuthorized: false,
+            userVerified: false,
+            loading: false,
+            userData: null,
+            ...loadedState,
         };
-        this.state = this.loadStateFromStorage(defaultState);
     }
 
     componentDidMount() {
+        const { userData } = this.state;
         window.addEventListener('beforeunload', this.handleWindowUnload);
-        this.stateSaveInterval = setInterval(this.saveCurrentState, 10000);
-        if (this.state.deviceId === null) {
-            this.fetchAndSaveDeviceId();
+        this.stateSaveInterval = setInterval(this.saveCurrentState, 20000);
+        if (userData !== null && Object.keys(userData).length > 0) {
+            this.verifyUser();
+        }
+    }
+
+    componentDidUpdate(_, prevState) {
+        if (this.state.userVerified && this.state.userVerified !== prevState.userVerified) {
+            this.checkDeviceIdIsAuthorized();
         }
     }
 
@@ -36,15 +59,50 @@ export default class App extends Component {
         clearInterval(this.stateSaveInterval);
     }
 
-    fetchAndSaveDeviceId = async() => {
-        try {
-            const deviceIdResponse = await fetch('/api/device-id');
-            const deviceIdJson = await deviceIdResponse.json();
-            this.setState({ deviceId: deviceIdJson.data });
-        } catch (e) {
-            console.error(e);
-            setTimeout(this.fetchAndSaveDeviceId, 5000);
+    verifyUser() {
+        const { userData: { token: userToken = null } } = this.state;
+        if (userToken === null) {
+            this.setState({ userData: null });
+            return;
         }
+
+        this.setState({ loading: true });
+        const req = request('/api/user-verify');
+        req.usePost();
+        const body = JSON.stringify({ userToken });
+        req.send({ body })
+            .then((res) => {
+                if (res.status !== 200) {
+                    return Promise.reject();
+                }
+                return res.json();
+            })
+            .then((res) => {
+                const { data: userData } = res;
+                this.setState({ loading: false, userData, userVerified: userData });
+            })
+            .catch(() => this.setState({ loading: false, userData: null }));
+    }
+
+    checkDeviceIdIsAuthorized() {
+        const { deviceId = null } = this.state.userData;
+
+        if (!deviceId) {
+            this.setState({ userData: null });
+            return;
+        }
+
+        this.setState({ loading: true });
+        request('/api/is-authorized', { deviceId })
+            .send()
+            .then((res) => {
+                if (res.status !== 200) {
+                    return Promise.reject();
+                }
+                return res.json();
+            })
+            .then((res) => this.setState({ loading: false, isAuthorized: res.data.authorized }))
+            .catch(() => this.setState({ loading: false }));
     }
 
     handleDateChange = (date) => {
@@ -53,6 +111,19 @@ export default class App extends Component {
 
     handleContentTabSelected = (selectedKey) => {
         this.setState({ activeContentTab: selectedKey });
+    }
+
+    handleMasterLoginAuthorize = () => {
+        this.setState({ isAuthorized: true });
+    }
+
+    handleUserLogIn = (userData) => {
+        this.setState({ userData });
+        this.checkDeviceIdIsAuthorized();
+    }
+
+    handleUserRegister = (userData) => {
+        this.handleUserLogIn(userData);
     }
 
     handleStationChange = (isDeparture, station) => {
@@ -83,33 +154,66 @@ export default class App extends Component {
         this.saveCurrentState();
     }
 
-    loadStateFromStorage(defaultState) {
+    loadStateFromStorage() {
         const currentTimestamp = new Date().getTime();
         const loadedState = StateStorage.load();
-        let state = { ...defaultState };
+        let state = {};
 
         if (loadedState) {
-            for (const key in state) {
-                if (state.hasOwnProperty(key) && loadedState.hasOwnProperty(key)) {
-                    state[key] = loadedState[key] || state[key];
+            PERSISTENT_STATE_ITEMS.forEach((key) => {
+                if (loadedState.hasOwnProperty(key)) {
+                    state[key] = loadedState[key];
                 }
-            }
+            });
         }
 
-        state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
-            new Date(departureTime).getTime() > currentTimestamp
-        ));
+        if (state.watchedRoutes instanceof Array) {
+            state.watchedRoutes = state.watchedRoutes.filter(({ departureTime }) => (
+                new Date(departureTime).getTime() > currentTimestamp
+            ));
+        }
 
         return state;
     }
 
     render() {
+        const { isAuthorized, loading, userData } = this.state;
+
+        if (loading) {
+            return this.renderPageHeader('Načítání...');
+        }
+
+        if (userData === null || Object.keys(userData).length === 0) {
+            return this.renderUserLogin();
+        }
+
+        if (!isAuthorized) {
+            return this.renderMasterLogin();
+        }
+
         return (
             <Fragment>
-                <PageHeader style={{ marginLeft: '20px' }}>RegioJet vyhledávač</PageHeader>
+                {this.renderPageHeader('RegioJet hlídač')}
                 {this.renderContentTabs()}
             </Fragment>
         );
+    }
+
+    renderPageHeader(title) {
+        return <PageHeader>{title}</PageHeader>
+    }
+
+    renderMasterLogin() {
+        const { userData } = this.state;
+        if (userData === null) {
+            return null;
+        }
+
+        return <MasterLogin deviceId={userData.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
+    }
+
+    renderUserLogin() {
+        return <UserLogin onLogIn={this.handleUserLogIn} onRegister={this.handleUserRegister}/>;
     }
 
     renderContentTabs() {
@@ -131,31 +235,42 @@ export default class App extends Component {
     }
 
     renderSearchTab() {
-        const { arrivalStation, date, departureStation, watchedRoutes } = this.state;
+        const { arrivalStation, date, departureStation, userData, watchedRoutes } = this.state;
         return (
             <Tab eventKey={1} title="Vyhledávání">
                 <Search
                     arrivalStation={arrivalStation}
                     date={date}
                     departureStation={departureStation}
+                    deviceId={userData.deviceId}
                     watchedRoutes={watchedRoutes}
                     onDateChange={this.handleDateChange}
                     onStationChange={this.handleStationChange}
                     onStationsSwap={this.handleStationsSwap}
-                    onToggleWatchdog={this.handleToggleWatchdog}/>
+                    onToggleWatchdog={this.handleToggleWatchdog}
+                />
             </Tab>
         );
     }
 
     renderWatchdogTab() {
+        const { userData, watchedRoutes } = this.state;
         return (
             <Tab eventKey={2} title="Sledované spoje">
-                <Watchdog routes={this.state.watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
+                <Watchdog
+                    deviceId={userData.deviceId}
+                    routes={watchedRoutes}
+                    onUnwatch={this.handleToggleWatchdog}
+                />
             </Tab>
         );
     }
 
     saveCurrentState = () => {
-        StateStorage.save(this.state);
+        let state = {};
+        PERSISTENT_STATE_ITEMS.forEach((item) => {
+            state[item] = this.state[item];
+        });
+        StateStorage.save(state);
     }
 }

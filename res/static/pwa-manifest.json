@@ -1,0 +1,41 @@
+{
+    "short_name": "RegioJet hlídač",
+    "name": "RegioJet vyhledávač a hlídač místenek",
+    "start_url": "/",
+    "background_color": "#FBBF20",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#FBBF20",
+    "icons": [
+        {
+            "src": "/static/images/icons/icon-32.png",
+            "type": "image/png",
+            "sizes": "32x32"
+        },
+        {
+            "src": "/static/images/icons/icon-64.png",
+            "type": "image/png",
+            "sizes": "64x64"
+        },
+        {
+            "src": "/static/images/icons/icon-128.png",
+            "type": "image/png",
+            "sizes": "128x128"
+        },
+        {
+            "src": "/static/images/icons/icon-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/static/images/icons/icon-256.png",
+            "type": "image/png",
+            "sizes": "256x256"
+        },
+        {
+            "src": "/static/images/icons/icon-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}

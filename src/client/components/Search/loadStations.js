@@ -1,8 +1,8 @@
 import request from "../../utils/request";
 import { API_URL } from "../../constants";
 
-const loadStations = () => {
-    const req = request(API_URL.DESTINATIONS);
+const loadStations = (deviceId) => {
+    const req = request(API_URL.DESTINATIONS, { deviceId });
     return req.send()
         .then((res) => {
             if (res.status !== 200) {
