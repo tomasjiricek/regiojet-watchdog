@@ -2,3 +2,4 @@ dist/*
 node_modules/*
 *.log
 data/*.json
+data/config.js
