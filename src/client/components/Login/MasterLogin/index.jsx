@@ -18,12 +18,12 @@ export default class MasterLogin extends Component {
         };
     }
 
-    handleAuthorized = (data) => {
+    handleAuthorized = (_) => {
         this.setState({ status: AUTH_STATUS.AUTHORIZED });
         this.props.onAuthorize();
     }
 
-    handleFailed = (data) => {
+    handleFailed = (_) => {
         this.setState({ password: '', status: AUTH_STATUS.FAILED });
     }
 
@@ -32,19 +32,25 @@ export default class MasterLogin extends Component {
     }
 
     handlePasswordSubmit = () => {
+        if (this.isAuthorizingOrAuthorized()) {
+            return;
+        }
+
         this.setState({ status: AUTH_STATUS.AUTHORIZING });
         const { password } = this.state;
         const { deviceId } = this.props;
-        const req = request('/api/master-login');
-        req.usePost();
-        const postBody = { deviceId, password };
-        req.send({ body: JSON.stringify(postBody) }).then((data) => {
-            if (data.status === 200) {
-                this.handleAuthorized(data);
-                return;
-            }
-            this.handleFailed(data);
-        });
+        const body = JSON.stringify({ deviceId, password });
+
+        request('/api/master-login')
+            .usePost()
+            .send({ body })
+            .then((data) => {
+                if (data.status === 200) {
+                    this.handleAuthorized(data);
+                    return;
+                }
+                this.handleFailed(data);
+            });
     }
 
     isAuthorizingOrAuthorized() {
@@ -94,6 +100,7 @@ export default class MasterLogin extends Component {
                     type="password"
                     value={this.state.password}
                     disabled={isDisabled}
+                    onSubmit={this.handlePasswordSubmit}
                     onChange={this.handlePasswordChange} />
                 <br />
                 <Button bsStyle="primary" disabled={isDisabled} onClick={this.handlePasswordSubmit}>Potvrdit</Button>

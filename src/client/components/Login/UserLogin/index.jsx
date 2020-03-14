@@ -24,34 +24,38 @@ export default class UserLogin extends Component {
 
     handleLoginSubmit = (securityImageIndex, knockCodeData) => {
         const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
-        const req = request('/api/user-login');
         const body = JSON.stringify({ token: encodedData });
-        req.usePost();
-        req.send({ body }).then((res) => {
-            if (res.status === 200) {
-                res.json().then((data) => {
-                    this.handleLoginSuccess(data.data);
-                });
-                return;
-            }
-            this.handleLoginFailed(res);
-        });
+
+        request('/api/user-login')
+            .usePost()
+            .send({ body })
+            .then((res) => {
+                if (res.status === 200) {
+                    res.json().then((data) => {
+                        this.handleLoginSuccess(data.data);
+                    });
+                    return;
+                }
+                this.handleLoginFailed(res);
+            });
     }
 
     handleRegisterSubmit = (securityImageIndex, knockCodeData) => {
         const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
-        const req = request('/api/user-register');
         const body = JSON.stringify({ token: encodedData });
-        req.usePost();
-        req.send({ body }).then((res) => {
-            if (res.status === 200) {
-                res.json().then((data) => {
-                    this.handleRegisterSuccess(data.data);
-                });
-                return;
-            }
-            this.handleRegisterFailed(res);
-        });
+
+        request('/api/user-register')
+            .usePost()
+            .send({ body })
+            .then((res) => {
+                if (res.status === 200) {
+                    res.json().then((data) => {
+                        this.handleRegisterSuccess(data.data);
+                    });
+                    return;
+                }
+                this.handleRegisterFailed(res);
+            });
     }
 
     handleLoginSuccess = (data) => {
