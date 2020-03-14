@@ -122,6 +122,10 @@ export default class App extends Component {
         this.checkDeviceIdIsAuthorized();
     }
 
+    handleUserRegister = (userData) => {
+        this.handleUserLogIn(userData);
+    }
+
     handleStationChange = (isDeparture, station) => {
         if (isDeparture) {
             this.setState({ departureStation: station });
@@ -209,7 +213,7 @@ export default class App extends Component {
     }
 
     renderUserLogin() {
-        return <UserLogin onLogIn={this.handleUserLogIn} onRegister={() => {}}/>;
+        return <UserLogin onLogIn={this.handleUserLogIn} onRegister={this.handleUserRegister}/>;
     }
 
     renderContentTabs() {
