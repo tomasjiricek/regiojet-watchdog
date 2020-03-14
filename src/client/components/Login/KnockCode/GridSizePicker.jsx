@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 
 export default class GridSizePicker extends Component {
-    handleClickSize = (size) => {
+    handleClickSize = (size, event) => {
+        event.preventDefault();
         this.props.onChange(size);
     }
 
@@ -17,11 +18,7 @@ export default class GridSizePicker extends Component {
         const { size: selectedSize, sizes } = this.props;
         return sizes.map((size) => {
             return (
-                <a 
-                    key={size}
-                    onClick={this.handleClickSize.bind(this, size)}
-                    style={{ display: 'inline-block', margin: '0 10px', cursor: 'pointer' }}
-                >
+                <a href="" key={size} onClick={this.handleClickSize.bind(this, size)}>
                     {this.renderGridPreview(size, selectedSize === size)}
                 </a>
             );
@@ -34,7 +31,7 @@ export default class GridSizePicker extends Component {
         const percentageSize = (100 / size) + '%';
         const color = isSelected ? 'dodgerblue' : 'black';
         const tableSize = '35px';
-        const colStyle = { 
+        const colStyle = {
             width: percentageSize,
             height: percentageSize,
             border: `2px solid ${color}`,

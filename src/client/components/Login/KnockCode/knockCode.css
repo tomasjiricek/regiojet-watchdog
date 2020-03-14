@@ -14,3 +14,31 @@
 .knock-code-grid td:active {
     background-color: #ccc;
 }
+
+.knock-code>div.error-message {
+    margin-left: 20px;
+    margin-bottom: 0;
+}
+
+.knock-code .grid-size-picker {
+    display: inline-block;
+    margin: 10px 38px 20px 38px;
+}
+
+.knock-code .grid-size-picker a {
+    display: inline-block;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+.knock-code .grid-size-picker a:first-child {
+    margin-left: 0;
+}
+
+.knock-code .grid-size-picker a:last-child {
+    margin-right: 0;
+}
+
+.knock-code-grid {
+    margin-left: 20px;
+}

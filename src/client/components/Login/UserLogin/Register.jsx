@@ -73,12 +73,12 @@ export default class Register extends Component {
         return (
             <div className="register">
                 <PageHeader>Registrace</PageHeader>
-                { error !== null && this.renderError(error) }
                 {!selectedImageConfirmed
                     ? <SecurityImages title={securityImagesTitle} onSubmit={this.handleImageSubmit}/>
                     : !knockCodeConfirmed
                         &&<KnockCode title={knockCodeTitle} onSubmit={this.handleKnockCodeSubmit}/>
                 }
+                { error !== null && this.renderError(error) }
             </div>
         );
     }

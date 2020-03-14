@@ -94,14 +94,28 @@ export default class UserLogin extends Component {
         return <p className="error-message">{error}</p>;
     }
 
+    renderLinkRegister() {
+        return (
+            <p className="link-register-login">
+                Nemáte účet? <a href="" onClick={this.handleToggleRegistrationView}>Zaregistrujte se</a>
+            </p>
+        );
+    }
+
+    renderLinkLogin() {
+        return (
+            <p className="link-register-login">
+                Máte účet? <a href="" onClick={this.handleToggleRegistrationView}>Přihlašte se</a>
+            </p>
+        );
+    }
+
     renderLoginView() {
         const { error } = this.state;
         return (
             <Fragment>
+                {this.renderLinkRegister()}
                 <Login onSubmit={this.handleLoginSubmit}/>
-                <p className="link-register-login">
-                    Nemáte účet? <a href="" onClick={this.handleToggleRegistrationView}>Zaregistrujte se</a>
-                </p>
                 {error && this.renderError(error)}
             </Fragment>
         );
@@ -111,10 +125,8 @@ export default class UserLogin extends Component {
         const { error } = this.state;
         return (
             <Fragment>
+                {this.renderLinkLogin()}
                 <Register onSubmit={this.handleRegisterSubmit}/>
-                <p className="link-register-login">
-                    Máte účet? <a href="" onClick={this.handleToggleRegistrationView}>Přihlašte se</a>
-                </p>
                 {error && this.renderError(error)}
             </Fragment>
         );

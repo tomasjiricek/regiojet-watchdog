@@ -1,10 +1,10 @@
 .user-login .error-message {
     display: inline-block;
     font-weight: bold;
-    margin: 17px 30px;
+    margin: 17px 25px;
     color: #cc3333;
 }
 .user-login .link-register-login {
     display: inline-block;
-    margin: 17px 30px;
+    margin: 17px 20px 17px 38px;
 }
