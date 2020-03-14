@@ -3,6 +3,8 @@ import Login from './Login';
 import request from '../../../utils/request';
 import Register from './Register';
 
+import './userLogin.css';
+
 export default class UserLogin extends Component {
     constructor(props) {
         super(props);
@@ -85,7 +87,9 @@ export default class UserLogin extends Component {
         return (
             <Fragment>
                 <Login onSubmit={this.handleLoginSubmit}/>
-                <p>Nemáte účet? <a href="" onClick={this.handleToggleRegistrationView}>Zaregistrujte se</a></p>
+                <p className="link-register-login">
+                    Nemáte účet? <a href="" onClick={this.handleToggleRegistrationView}>Zaregistrujte se</a>
+                </p>
             </Fragment>
         );
     }
@@ -94,7 +98,9 @@ export default class UserLogin extends Component {
         return (
             <Fragment>
                 <Register onSubmit={this.handleRegisterSubmit}/>
-                <p>Máte účet? <a href="" onClick={this.handleToggleRegistrationView}>Přihlašte se</a></p>
+                <p className="link-register-login">
+                    Máte účet? <a href="" onClick={this.handleToggleRegistrationView}>Přihlašte se</a>
+                </p>
             </Fragment>
         );
     }
