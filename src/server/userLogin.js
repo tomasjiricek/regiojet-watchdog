@@ -82,7 +82,8 @@ function registerUser(authData) {
 
             users[token] = {
                 deviceId: getRandomDeviceId(),
-                registered: new Date().getTime()
+                registered: new Date().getTime(),
+                token
             };
 
             fs.writeFile(USERS_PATH, JSON.stringify(users), (err) => {
@@ -101,6 +102,7 @@ function createUsersFile() {
 }
 
 module.exports = {
+    findUserByToken,
     getUserByAuthData,
     registerUser
 };

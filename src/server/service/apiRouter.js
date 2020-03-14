@@ -3,7 +3,7 @@ const express = require('express');
 const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/regiojetApi');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
 const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../masterLogin');
-const { getUserByAuthData, registerUser } = require('../userLogin');
+const { findUserByToken, getUserByAuthData, registerUser } = require('../userLogin');
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {
@@ -23,7 +23,6 @@ router.post('/user-login', (req, res) => {
     try {
         const decodedData = Buffer.from(body.token, 'base64');
         const authData = JSON.parse(decodedData.toString());
-        console.log(authData);
 
         getUserByAuthData(authData)
             .then((data) => {
@@ -34,6 +33,18 @@ router.post('/user-login', (req, res) => {
     } catch(_) {
         return _sendError(res, { statusCode: 500, error: { message: 'Invalid data structure' } })
     }
+});
+
+router.post('/user-verify', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body: { userToken = null } } = req;
+
+    findUserByToken(userToken)
+        .then((data) => {
+            res.status(200).send({ status: 'OK', data });
+        })
+        .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
+
 });
 
 router.post('/user-register', (req, res) => {

@@ -7,16 +7,19 @@ const request = (pathName, query) => {
         });
     }
     let defaultOptions = { signal: controller.signal };
-    return {
+    const api = {
         abort: () => controller.abort(),
         usePost: (contentType = 'application/json') => {
             defaultOptions.method = 'POST';
             defaultOptions.headers = {
                 'Content-Type': contentType
             };
+            return api;
         },
         send: (fetchOptions) => fetch(url, { ...fetchOptions, ...defaultOptions }),
     };
+
+    return api;
 }
 
 export default request;

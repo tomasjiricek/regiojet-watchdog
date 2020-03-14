@@ -5,19 +5,20 @@ import About from './About';
 import MasterLogin from './Login/MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
+import UserLogin from './Login/UserLogin';
 import Watchdog from './Watchdog';
+
 import { getUTCISODate } from '../utils/date';
 import request from '../utils/request';
 
 import './app.css';
-import UserLogin from './Login/UserLogin';
 
 const PERSISTENT_STATE_ITEMS = [
     'activeContentTab',
     'arrivalStation',
     'departureStation',
-    'deviceId',
     'watchedRoutes',
+    'userData',
 ]
 
 export default class App extends Component {
@@ -30,19 +31,25 @@ export default class App extends Component {
             watchedRoutes: [],
             arrivalStation: null,
             departureStation: null,
-            deviceId: null,
             isAuthorized: false,
-            isCheckingAuthorization: true,
+            userVerified: false,
+            loading: false,
+            userData: null,
             ...loadedState,
         };
     }
 
     componentDidMount() {
+        const { userData } = this.state;
         window.addEventListener('beforeunload', this.handleWindowUnload);
         this.stateSaveInterval = setInterval(this.saveCurrentState, 20000);
-        if (this.state.deviceId === null) {
-            this.fetchAndSaveDeviceId();
-        } else {
+        if (userData !== null && Object.keys(userData).length > 0) {
+            this.verifyUser();
+        }
+    }
+
+    componentDidUpdate(_, prevState) {
+        if (this.state.userVerified && this.state.userVerified !== prevState.userVerified) {
             this.checkDeviceIdIsAuthorized();
         }
     }
@@ -52,28 +59,50 @@ export default class App extends Component {
         clearInterval(this.stateSaveInterval);
     }
 
-    fetchAndSaveDeviceId = async() => {
-        try {
-            const deviceIdResponse = await fetch('/api/device-id');
-            const deviceIdJson = await deviceIdResponse.json();
-            this.setState({ deviceId: deviceIdJson.data });
-        } catch (e) {
-            console.error(e);
-            setTimeout(this.fetchAndSaveDeviceId, 5000);
+    verifyUser() {
+        const { userData: { token: userToken = null } } = this.state;
+        if (userToken === null) {
+            this.setState({ userData: null });
+            return;
         }
+
+        this.setState({ loading: true });
+        const req = request('/api/user-verify');
+        req.usePost();
+        const body = JSON.stringify({ userToken });
+        req.send({ body })
+            .then((res) => {
+                if (res.status !== 200) {
+                    return Promise.reject();
+                }
+                return res.json();
+            })
+            .then((res) => {
+                const { data: userData } = res;
+                this.setState({ loading: false, userData, userVerified: userData });
+            })
+            .catch(() => this.setState({ loading: false, userData: null }));
     }
 
     checkDeviceIdIsAuthorized() {
-        const { deviceId } = this.state;
+        const { deviceId = null } = this.state.userData;
+
+        if (!deviceId) {
+            this.setState({ userData: null });
+            return;
+        }
+
+        this.setState({ loading: true });
         request('/api/is-authorized', { deviceId })
             .send()
-            .then((res) => res.json())
             .then((res) => {
-                this.setState({ isCheckingAuthorization: false, isAuthorized: res.data.authorized });
+                if (res.status !== 200) {
+                    return Promise.reject();
+                }
+                return res.json();
             })
-            .catch(() => {
-                // Request failed
-            })
+            .then((res) => this.setState({ loading: false, isAuthorized: res.data.authorized }))
+            .catch(() => this.setState({ loading: false }));
     }
 
     handleDateChange = (date) => {
@@ -88,8 +117,9 @@ export default class App extends Component {
         this.setState({ isAuthorized: true });
     }
 
-    handleUserLoggedIn = (userData) => {
-        console.log(userData);
+    handleUserLogIn = (userData) => {
+        this.setState({ userData });
+        this.checkDeviceIdIsAuthorized();
     }
 
     handleStationChange = (isDeparture, station) => {
@@ -143,14 +173,18 @@ export default class App extends Component {
     }
 
     render() {
-        const { deviceId, isAuthorized, isCheckingAuthorization } = this.state;
+        const { isAuthorized, loading, userData } = this.state;
 
-        if (deviceId === null || isCheckingAuthorization) {
+        if (loading) {
             return this.renderPageHeader('Načítání...');
         }
 
+        if (userData === null || Object.keys(userData).length === 0) {
+            return this.renderUserLogin();
+        }
+
         if (!isAuthorized) {
-            return this.renderUserLogin(); // this.renderMasterLogin();
+            return this.renderMasterLogin();
         }
 
         return (
@@ -166,11 +200,16 @@ export default class App extends Component {
     }
 
     renderMasterLogin() {
-        return <MasterLogin deviceId={this.state.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
+        const { userData } = this.state;
+        if (userData === null) {
+            return null;
+        }
+
+        return <MasterLogin deviceId={userData.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
     }
 
     renderUserLogin() {
-        return <UserLogin onLoggedIn={this.handleUserLoggedIn} />;
+        return <UserLogin onLogIn={this.handleUserLogIn} onRegister={() => {}}/>;
     }
 
     renderContentTabs() {
@@ -192,14 +231,14 @@ export default class App extends Component {
     }
 
     renderSearchTab() {
-        const { arrivalStation, date, departureStation, deviceId, watchedRoutes } = this.state;
+        const { arrivalStation, date, departureStation, userData, watchedRoutes } = this.state;
         return (
             <Tab eventKey={1} title="Vyhledávání">
                 <Search
                     arrivalStation={arrivalStation}
                     date={date}
                     departureStation={departureStation}
-                    deviceId={deviceId}
+                    deviceId={userData.deviceId}
                     watchedRoutes={watchedRoutes}
                     onDateChange={this.handleDateChange}
                     onStationChange={this.handleStationChange}
@@ -211,11 +250,11 @@ export default class App extends Component {
     }
 
     renderWatchdogTab() {
-        const { deviceId, watchedRoutes } = this.state;
+        const { userData, watchedRoutes } = this.state;
         return (
             <Tab eventKey={2} title="Sledované spoje">
                 <Watchdog
-                    deviceId={deviceId}
+                    deviceId={userData.deviceId}
                     routes={watchedRoutes}
                     onUnwatch={this.handleToggleWatchdog}
                 />
