@@ -24,13 +24,15 @@ export default class SecurityImages extends Component {
     }
 
     handleSubmit = () => {
-        this.props.onSubmit(this.state.selectedImageIndex);
+        const { selectedImageIndex } = this.state;
+        this.setState({ selectedImageIndex: null });
+        this.props.onSubmit(selectedImageIndex);
     }
 
     render() {
         return (
             <div className="security-images">
-                <PageHeader>Vyberte bezpečnostní obrázek</PageHeader>
+                <h2>{this.props.title}</h2>
                 {this.renderImages()}
                 {this.renderSubmitButton()}
             </div>

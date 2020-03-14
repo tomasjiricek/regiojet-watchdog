@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Login from './Login';
 import request from '../../../utils/request';
+import Register from './Register';
 
 export default class UserLogin extends Component {
     constructor(props) {
@@ -11,12 +12,7 @@ export default class UserLogin extends Component {
     }
 
     handleLoginSubmit = (securityImageIndex, knockCodeData) => {
-        const encodedData = window.btoa(JSON.stringify({
-            salt: Math.random(),
-            ...knockCodeData,
-            securityImageIndex,
-            timestamp: new Date().getTime()
-        }));
+        const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
         const req = request('/api/user-login');
         const body = JSON.stringify({ token: encodedData });
         req.usePost();
@@ -29,6 +25,20 @@ export default class UserLogin extends Component {
         });
     }
 
+    handleRegisterSubmit = (securityImageIndex, knockCodeData) => {
+        const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
+        const req = request('/api/user-register');
+        const body = JSON.stringify({ token: encodedData });
+        req.usePost();
+        req.send({ body }).then((data) => {
+            if (data.status === 200) {
+                this.handleRegisterSuccess(data);
+                return;
+            }
+            this.handleRegisterFailed(data);
+        });
+    }
+
     handleLoginSuccess = (data) => {
 
     }
@@ -37,11 +47,29 @@ export default class UserLogin extends Component {
 
     }
 
+    handleRegisterSuccess = (data) => {
+
+    }
+
+    handleRegisterFailed = (data) => {
+
+    }
+
     render() {
         return (
             <div className="user-login">
                 <Login onSubmit={this.handleLoginSubmit}/>
+                <Register onSubmit={this.handleRegisterSubmit}/>
             </div>
         );
+    }
+
+    encodeLoginData(securityImageIndex, knockCodeData) {
+        return window.btoa(JSON.stringify({
+            salt: Math.random(),
+            ...knockCodeData,
+            securityImageIndex,
+            timestamp: new Date().getTime()
+        }));
     }
 };

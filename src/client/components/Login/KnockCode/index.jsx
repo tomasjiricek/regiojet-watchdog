@@ -57,8 +57,11 @@ export default class KnockCode extends Component {
 
     render() {
         const { errorMessage, gridSize } = this.state;
+        const { title } = this.props;
+
         return (
             <div className="knock-code">
+                <h2>{title}</h2>
                 <GridSizePicker size={gridSize} sizes={AVAILABLE_GRID_SIZES} onChange={this.handleGridSizeChange} />
                 <KnockCodeGrid size={gridSize} onSubmit={this.handleLoginPatternSubmit} />
                 {errorMessage && <div className="error-message">{errorMessage}</div>}

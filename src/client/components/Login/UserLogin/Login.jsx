@@ -39,9 +39,10 @@ export default class Login extends Component {
 
         return (
             <div className="login">
+                <PageHeader>Přihlášení</PageHeader>
                 {selectedImage === null
-                    ? <SecurityImages onSubmit={this.handleImageSubmit}/>
-                    : <KnockCode onSubmit={this.handleKnockCodeSubmit}/>
+                    ? <SecurityImages title="Vyberte bezpečnostní obrázek" onSubmit={this.handleImageSubmit}/>
+                    : <KnockCode title="Zadejte přihlašovací vzor" onSubmit={this.handleKnockCodeSubmit}/>
                 }
             </div>
         );

@@ -70,9 +70,15 @@ function registerUser(authData) {
             }
 
             let users = {};
+
             try {
                 users = JSON.parse(data);
             } catch (_) {}
+
+            if (users[token] !== undefined) {
+                reject({ code: 500, message: 'Failed to register the user.'});
+                return;
+            }
 
             users[token] = {
                 deviceId: getRandomDeviceId(),

@@ -44,7 +44,7 @@ export default class KnockCodeGrid extends Component {
         const { size } = this.props;
         const rows = [];
         const percentageSize = (100 / size) + '%';
-        const colStyle = { 
+        const colStyle = {
             width: percentageSize,
             height: percentageSize,
             border: `1px solid #666`,
