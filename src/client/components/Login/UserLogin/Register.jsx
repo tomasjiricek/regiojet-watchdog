@@ -84,9 +84,7 @@ export default class Register extends Component {
     }
 
     renderError(error) {
-        return (
-            <p>{error}</p>
-        );
+        return <p className="error-message">{error}</p>;
     }
 
     clearError = () => {

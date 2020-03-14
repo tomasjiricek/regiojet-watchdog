@@ -25,11 +25,6 @@ export default class Login extends Component {
         this.submit(knockCodeData);
     }
 
-    submit(knockCodeData) {
-        this.props.onSubmit(this.state.selectedImage, knockCodeData);
-        this.setState({ submitted: true });
-    }
-
     render() {
         const { selectedImage } = this.state;
 
@@ -42,5 +37,10 @@ export default class Login extends Component {
                 }
             </div>
         );
+    }
+
+    submit(knockCodeData) {
+        this.props.onSubmit(this.state.selectedImage, knockCodeData);
+        this.setState({ submitted: true });
     }
 };

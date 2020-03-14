@@ -5,10 +5,19 @@ import Register from './Register';
 
 import './userLogin.css';
 
+const ERROR_TIMEOUT = 4000;
+const ERROR_TYPE = {
+    USER_NOT_FOUND: 1,
+    CANNOT_CREATE_USER: 2,
+    REQUEST_FAILED: 3
+}
+
 export default class UserLogin extends Component {
     constructor(props) {
         super(props);
+        this.errorTimeout = null;
         this.state = {
+            errpr: null,
             registrationView: false
         };
     }
@@ -25,9 +34,7 @@ export default class UserLogin extends Component {
                 });
                 return;
             }
-            res.json().then((data) => {
-                this.handleLoginFailed(data);
-            });
+            this.handleLoginFailed(res);
         });
     }
 
@@ -43,9 +50,7 @@ export default class UserLogin extends Component {
                 });
                 return;
             }
-            res.json().then((data) => {
-                this.handleRegisterFailed(data);
-            });
+            this.handleRegisterFailed(res);
         });
     }
 
@@ -53,16 +58,18 @@ export default class UserLogin extends Component {
         this.props.onLogIn(data);
     }
 
-    handleLoginFailed = (data) => {
-
+    handleLoginFailed = (res) => {
+        this.forceUpdateNestedComponent();
+        this.setError(res.status === 403 ? ERROR_TYPE.USER_NOT_FOUND : ERROR_TYPE.REQUEST_FAILED);
     }
 
     handleRegisterSuccess = (data) => {
         this.props.onRegister(data);
     }
 
-    handleRegisterFailed = (data) => {
-
+    handleRegisterFailed = (_) => {
+        this.forceUpdateNestedComponent();
+        this.setError(ERROR_TYPE.CANNOT_CREATE_USER);
     }
 
     handleToggleRegistrationView = (event) => {
@@ -83,24 +90,32 @@ export default class UserLogin extends Component {
         );
     }
 
+    renderError(error) {
+        return <p className="error-message">{error}</p>;
+    }
+
     renderLoginView() {
+        const { error } = this.state;
         return (
             <Fragment>
                 <Login onSubmit={this.handleLoginSubmit}/>
                 <p className="link-register-login">
                     Nemáte účet? <a href="" onClick={this.handleToggleRegistrationView}>Zaregistrujte se</a>
                 </p>
+                {error && this.renderError(error)}
             </Fragment>
         );
     }
 
     renderRegistrationView() {
+        const { error } = this.state;
         return (
             <Fragment>
                 <Register onSubmit={this.handleRegisterSubmit}/>
                 <p className="link-register-login">
                     Máte účet? <a href="" onClick={this.handleToggleRegistrationView}>Přihlašte se</a>
                 </p>
+                {error && this.renderError(error)}
             </Fragment>
         );
     }
@@ -113,4 +128,38 @@ export default class UserLogin extends Component {
             timestamp: new Date().getTime()
         }));
     }
+
+    forceUpdateNestedComponent() {
+        const { registrationView } = this.state;
+
+        this.setState({ registrationView: !registrationView });
+        this.setState({ registrationView });
+    }
+
+    clearError = () => {
+        clearTimeout(this.errorTimeout);
+        this.errorTimeout = null;
+        this.setState({ error: null });
+    }
+
+    setError(type) {
+        switch (type) {
+            case ERROR_TYPE.USER_NOT_FOUND:
+                this.setState({ error: 'Uživatel nenalezen.' });
+                break;
+            case ERROR_TYPE.CANNOT_CREATE_USER:
+                this.setState({ error: 'Chyba při vytváření uživatele.' });
+                break;
+            case ERROR_TYPE.REQUEST_FAILED:
+                this.setState({ error: 'Chyba při zpracování požadavku. Zkuste to prosím později.' });
+                break;
+        }
+
+        if (this.errorTimeout !== null) {
+            clearTimeout(this.errorTimeout);
+        }
+
+        this.errorTimeout = setTimeout(this.clearError, ERROR_TIMEOUT);
+    }
+
 };

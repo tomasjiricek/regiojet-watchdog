@@ -5,7 +5,7 @@ import KnockCodeGrid from './KnockCodeGrid';
 import './knockCode.css';
 
 const AVAILABLE_GRID_SIZES = [2, 3, 4];
-const ERROR_MESSAGE_TIMEOUT = 6000;
+const ERROR_TIMEOUT = 4000;
 const MIN_PATTERN_LENGTH_BASE = 6;
 const MIN_PATTERN_TILES_COUNT_BASE = 3;
 
@@ -35,9 +35,9 @@ function isPatternStrong(size, pattern) {
 export default class KnockCode extends Component {
     constructor(props) {
         super(props);
-        this.errorMessageTimer = null;
+        this.errorTimeout = null;
         this.state = {
-            errorMessage: null,
+            error: null,
             gridSize: 3,
         };
     }
@@ -48,7 +48,7 @@ export default class KnockCode extends Component {
 
     handleLoginPatternSubmit = (size, pattern) => {
         if (!isPatternStrong(size, pattern)) {
-            this.setErrorMessage('Přihlašovací vzor je příliš slabý!');
+            this.setError('Přihlašovací vzor je příliš slabý!');
             return;
         }
 
@@ -56,7 +56,7 @@ export default class KnockCode extends Component {
     }
 
     render() {
-        const { errorMessage, gridSize } = this.state;
+        const { error, gridSize } = this.state;
         const { title } = this.props;
 
         return (
@@ -64,22 +64,22 @@ export default class KnockCode extends Component {
                 <h2>{title}</h2>
                 <GridSizePicker size={gridSize} sizes={AVAILABLE_GRID_SIZES} onChange={this.handleGridSizeChange} />
                 <KnockCodeGrid size={gridSize} onSubmit={this.handleLoginPatternSubmit} />
-                {errorMessage && <div className="error-message">{errorMessage}</div>}
+                {error && <div className="error-message">{error}</div>}
             </div>
         );
     }
 
-    clearErrorMessage = () => {
-        this.setState({ errorMessage: null });
-        clearTimeout(this.errorMessageTimer);
-        this.errorMessageTimer = null;
+    clearError = () => {
+        this.setState({ error: null });
+        clearTimeout(this.errorTimeout);
+        this.errorTimeout = null;
     }
 
-    setErrorMessage(errorMessage) {
-        if (this.errorMessageTimer !== null) {
-            clearTimeout(this.errorMessageTimer);
+    setError(error) {
+        if (this.errorTimeout !== null) {
+            clearTimeout(this.errorTimeout);
         }
-        this.setState({ errorMessage });
-        this.errorMessageTimer = setTimeout(this.clearErrorMessage, ERROR_MESSAGE_TIMEOUT);
+        this.setState({ error });
+        this.errorTimeout = setTimeout(this.clearError, ERROR_TIMEOUT);
     }
 }
