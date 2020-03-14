@@ -31,11 +31,7 @@ export default class Login extends Component {
     }
 
     render() {
-        const { selectedImage, submitted } = this.state;
-
-        if (submitted) {
-            return <PageHeader>Přihlašování...</PageHeader>
-        }
+        const { selectedImage } = this.state;
 
         return (
             <div className="login">
