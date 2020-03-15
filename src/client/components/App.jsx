@@ -41,11 +41,17 @@ export default class App extends Component {
 
     componentDidMount() {
         const { userData } = this.state;
+
         window.addEventListener('beforeunload', this.handleWindowUnload);
+
         this.stateSaveInterval = setInterval(this.saveCurrentState, 20000);
         if (userData !== null && Object.keys(userData).length > 0) {
             this.verifyUser();
         }
+        this.registerServiceWorker();
+        Notification.requestPermission(function(status) {
+            console.log('Notification permission status:', status);
+        });
     }
 
     componentDidUpdate(_, prevState) {
@@ -174,6 +180,27 @@ export default class App extends Component {
         }
 
         return state;
+    }
+
+    registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('static/worker.js').then(function(reg) {
+                console.log('Service Worker Registered!', reg);
+
+                reg.pushManager.getSubscription().then(function(sub) {
+                    if (sub === null) {
+                        // Update UI to ask user to register for Push
+                        console.log('Not subscribed to push service!');
+                    } else {
+                        // We have a subscription, update the database
+                        console.log('Subscription object: ', sub);
+                    }
+                });
+            })
+            .catch(function(err) {
+                console.log('Service Worker registration failed: ', err);
+            });
+        }
     }
 
     render() {
