@@ -48,10 +48,13 @@ export default class App extends Component {
         if (userData !== null && Object.keys(userData).length > 0) {
             this.verifyUser();
         }
-        this.registerServiceWorker();
+
         Notification.requestPermission(function(status) {
             console.log('Notification permission status:', status);
         });
+
+        this.registerServiceWorker();
+        this.subscribeForNotifications();
     }
 
     componentDidUpdate(_, prevState) {
@@ -300,4 +303,25 @@ export default class App extends Component {
         });
         StateStorage.save(state);
     }
+
+    subscribeForNotifications() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready
+                .then((reg) => {
+                    reg.pushManager.subscribe({
+                    userVisibleOnly: true
+                })
+                .then((sub) => {
+                    console.log('Endpoint URL: ', sub.endpoint);
+                })
+                .catch((e) => {
+                    if (Notification.permission === 'denied') {
+                        console.warn('Permission for notifications was denied');
+                    } else {
+                        console.error('Unable to subscribe to push', e);
+                    }
+                });
+            })
+        }
+      }
 }
