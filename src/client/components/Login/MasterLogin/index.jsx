@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, FormControl, Modal } from 'react-bootstrap';
+import { Button, Form, FormControl, Modal, FormGroup } from 'react-bootstrap';
 import request from '../../../utils/request';
 
 const AUTH_STATUS = {
@@ -31,7 +31,8 @@ export default class MasterLogin extends Component {
         this.setState({ password: event.target.value });
     }
 
-    handlePasswordSubmit = () => {
+    handlePasswordSubmit = (event) => {
+        event.preventDefault();
         if (this.isAuthorizingOrAuthorized()) {
             return;
         }
@@ -94,16 +95,21 @@ export default class MasterLogin extends Component {
         const inputBsStyle = this.hasAuthorizationFailed() && password.length === 0 ? 'error' : 'default';
         return (
             <Modal.Body>
-                <FormControl
-                    bsStyle={inputBsStyle}
-                    placeholder="Heslo"
-                    type="password"
-                    value={this.state.password}
-                    disabled={isDisabled}
-                    onSubmit={this.handlePasswordSubmit}
-                    onChange={this.handlePasswordChange} />
-                <br />
-                <Button bsStyle="primary" disabled={isDisabled} onClick={this.handlePasswordSubmit}>Potvrdit</Button>
+                <Form onSubmit={this.handlePasswordSubmit}>
+                    <FormGroup controlId="master-password">
+                        <FormControl
+                            bsStyle={inputBsStyle}
+                            placeholder="Heslo"
+                            type="password"
+                            value={this.state.password}
+                            disabled={isDisabled}
+                            onChange={this.handlePasswordChange}
+                        />
+                    </FormGroup>
+                    <FormGroup controlId="master-password-submit">
+                        <Button bsStyle="primary" disabled={isDisabled} onClick={this.handlePasswordSubmit}>Potvrdit</Button>
+                    </FormGroup>
+                </Form>
             </Modal.Body>
         );
     }
