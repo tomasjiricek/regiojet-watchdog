@@ -184,7 +184,7 @@ export default class App extends Component {
 
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('static/worker.js').then(function(reg) {
+            navigator.serviceWorker.register('sw.js').then(function(reg) {
                 console.log('Service Worker Registered!', reg);
 
                 reg.pushManager.getSubscription().then(function(sub) {
