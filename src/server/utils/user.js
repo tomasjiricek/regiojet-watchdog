@@ -39,7 +39,7 @@ function isSubscribed(userSubscriptions, subscription) {
         if (!(item instanceof Object)) {
             continue;
         }
-        if (subscription.endpointUrl === item.endpoint) {
+        if (subscription.endpoint === item.endpoint) {
             return true;
         }
     }
