@@ -54,7 +54,6 @@ export default class App extends Component {
         });
 
         this.registerServiceWorker();
-        this.subscribeForNotifications();
     }
 
     componentDidUpdate(_, prevState) {
@@ -109,6 +108,10 @@ export default class App extends Component {
                     return Promise.reject();
                 }
                 return res.json();
+            })
+            .then((res) => {
+                this.subscribeForNotifications();
+                return Promise.resolve(res);
             })
             .then((res) => this.setState({ loading: false, isAuthorized: res.data.authorized }))
             .catch(() => this.setState({ loading: false }));
@@ -304,14 +307,27 @@ export default class App extends Component {
         StateStorage.save(state);
     }
 
+    saveSubscription = (subscription) => {
+        const { userData: { token: userToken = null } } = this.state;
+        const body = JSON.stringify({ userToken, endpointUrl: subscription.endpoint });
+
+        request('/api/user-push-subscribe')
+            .usePost()
+            .send({ body })
+            .then(() => {
+                console.log('BE subscribed');
+            })
+            .catch((error) => {
+                console.error('BE subscription failed:', error);
+            });
+    }
+
     subscribeForNotifications() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready
                 .then((reg) => {
                     reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY })
-                        .then((sub) => {
-                            console.log('Endpoint URL: ', sub.endpoint);
-                        })
+                        .then((sub) => this.saveSubscription(sub))
                         .catch((e) => {
                             if (Notification.permission === 'denied') {
                                 console.warn('Permission for notifications was denied');
