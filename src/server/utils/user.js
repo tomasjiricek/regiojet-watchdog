@@ -109,6 +109,7 @@ function saveUserPushSubscription(token, endpointUrl) {
     return new Promise((resolve, reject) => {
         fs.readFile(WEB_PUSH_SUBSCRIBERS_PATH, {}, (err, data) => {
             if (err) {
+                reject({ code: 500, message: 'Failed to load file with subscribers' });
                 return;
             }
 
@@ -116,7 +117,10 @@ function saveUserPushSubscription(token, endpointUrl) {
 
             try {
                 subscribers = JSON.parse(data);
-            } catch (_) {}
+            } catch (_) {
+                reject({ code: 500, message: 'Failed to parse file with subscribers' });
+                return;
+            }
 
             if (subscribers[token] === undefined) {
                 subscribers[token] = { token, endpointUrls: [] };
