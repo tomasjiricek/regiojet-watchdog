@@ -35,8 +35,11 @@ function isAuthDataValid({ selectedImageIndex = null, size = null, pattern = nul
 
 function isSubscribed(userSubscriptions, subscription) {
     for (const i of userSubscriptions) {
-        const { endpointUrl } = userSubscriptions[i];
-        if (subscription.endpointUrl === endpointUrl) {
+        const item = userSubscriptions[i];
+        if (!(item instanceof Object)) {
+            continue;
+        }
+        if (subscription.endpointUrl === item.endpointUrl) {
             return true;
         }
     }
