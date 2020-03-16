@@ -138,7 +138,7 @@ function saveUserPushSubscription(token, subscription) {
             }
 
             if (!isSubscribed(subscribers[token].subscriptions, subscription)) {
-                subscribers[token].endpointUrls.push(subscription);
+                subscribers[token].subscriptions.push(subscription);
                 fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
                     if (err) {
                         reject({ code: 500, message: 'Failed to subscribe the user.' });
