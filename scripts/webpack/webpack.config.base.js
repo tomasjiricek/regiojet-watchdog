@@ -10,21 +10,6 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const RES_DIR = path.join(ROOT_DIR, 'res');
 
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-
-    const rawData = Buffer.from(base64, 'base64').toString();
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
 module.exports = {
     entry: path.join(ROOT_DIR, 'src/client/index.js'),
     output: {
@@ -39,7 +24,7 @@ module.exports = {
             to: DIST_DIR
         }]),
         new DefinePlugin({
-            VAPID_PUBLIC_KEY: urlBase64ToUint8Array(secrets.webPushPublicKey)
+            "WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY": secrets.webPushPublicKey
         }),
         new CleanWebpackPlugin({
             cleanAfterEveryBuildPatterns: ['!static/**']
