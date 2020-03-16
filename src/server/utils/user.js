@@ -2,7 +2,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const USERS_PATH = path.join(__dirname, '../../data/users.json');
+const DATA_PATH = path.join(__dirname, '../../../data');
+const USERS_PATH = path.join(DATA_PATH, 'users.json');
+const WEB_PUSH_SUBSCRIBERS_PATH = path.join(DATA_PATH, 'webPushSubscribers.json');
 
 function getRandomDeviceId() {
     return crypto.randomBytes(35).toString('base64').replace(/[^a-z0-9]/gi, '');
@@ -97,6 +99,37 @@ function registerUser(authData) {
     });
 }
 
+function subscribeUserForWebPush(token, endpointUrl) {
+    fs.readFile(WEB_PUSH_SUBSCRIBERS_PATH, {}, (err, data) => {
+        if (err) {
+            return;
+        }
+
+        let subscribers = {};
+
+        try {
+            subscribers = JSON.parse(data);
+        } catch (_) {}
+
+        if (subscribers[token] === undefined) {
+            subscribers[token] = { token, endpointUrls: [] };
+        }
+
+        if (subscribers[token].endpointUrls.indexOf(endpointUrl) === -1) {
+            subscribers[token].endpointUrls.push(endpointUrl);
+        }
+
+        fs.writeFile(WEB_PUSH_SUBSCRIBERS_PATH, JSON.stringify(subscribers), (err) => {
+            if (err) {
+                reject({ code: 500, message: 'Failed to subscribe the user.' });
+                return;
+            }
+            resolve();
+        });
+    });
+
+}
+
 function createUsersFile() {
     fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
 }
@@ -104,5 +137,6 @@ function createUsersFile() {
 module.exports = {
     findUserByToken,
     getUserByAuthData,
-    registerUser
+    registerUser,
+    subscribeUserForWebPush
 };

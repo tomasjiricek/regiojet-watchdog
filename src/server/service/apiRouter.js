@@ -2,12 +2,12 @@ const express = require('express');
 
 const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/regiojetApi');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
-const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../masterLogin');
-const { findUserByToken, getUserByAuthData, registerUser } = require('../userLogin');
+const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../utils/masterLogin');
+const { findUserByToken, getUserByAuthData, registerUser, subscribeUserForWebPush } = require('../utils/user');
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {
-        data = { data };
+        data = { error: { message: data } };
     }
     data.statusCode = data.statusCode || 500;
     response.status(data.statusCode).send({ status: 'ERROR', data });
@@ -62,8 +62,24 @@ router.post('/user-register', (req, res) => {
             .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
     } catch(_) {
-        return _sendError(res, { statusCode: 500, error: { message: 'Invalid data structure' } })
+        return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } })
     }
+});
+
+router.post('/user-push-subscribe', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body: { userToken = null, endpointUrl = null } } = req;
+
+    if (!userToken || !endpointUrl) {
+        return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
+    }
+
+    subscribeUserForWebPush(userToken, endpointUrl)
+        .then(() => {
+            res.status(200).send({ status: 'OK' });
+        })
+        .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
+
 });
 
 router.post('/master-login', (req, res) => {
@@ -118,7 +134,12 @@ router.get('/route/search', (req, res) => {
     let { date, minDeparture, maxDeparture } = req.query;
 
     if (!departureStationId || !arrivalStationId || !departureStationType || !arrivalStationType) {
-        return _sendError(res, 'Missing mandatory params: departureStationId, departureStationType, arrivalStationId, arrivalStationType');
+        return _sendError(res, {
+            statusCode: 400,
+            error: {
+                message: 'Missing mandatory params: departureStationId, departureStationType, arrivalStationId, arrivalStationType'
+            }
+        });
     }
 
     date = date || new Date().toISOString().split('T')[0];
@@ -150,7 +171,7 @@ router.get('/route/:routeId([0-9]+)/detail', (req, res) => {
     } = req;
 
     if (!stationIdFrom || !stationIdTo) {
-        return _sendError(res, 'Missing mandatory params: stationIdFrom, stationIdTo');
+        return _sendError(res, { statusCode: 400, error: { message: 'Missing mandatory params: stationIdFrom, stationIdTo' } });
     }
 
     isDeviceAuthorized(deviceId)

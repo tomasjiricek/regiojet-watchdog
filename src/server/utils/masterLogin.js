@@ -3,7 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 const MASTER_PASSWORD = 'fb0cb9bcd4a1b61a56196d7148696bd689200800478fcfb8c9963aaa7daeb365'; // Watch-dog1
-const AUTHORIZED_DEVICES_PATH = path.join(__dirname, '../../data/authorized-devices.json');
+
+const DATA_PATH = path.join(__dirname, '../../../data');
+const AUTHORIZED_DEVICES_PATH = path.join(DATA_PATH, 'authorized-devices.json');
 
 function isPasswordValid(password) {
     return new Promise((resolve, reject) => {
