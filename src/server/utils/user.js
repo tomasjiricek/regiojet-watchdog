@@ -137,7 +137,7 @@ function saveUserPushSubscription(token, subscription) {
                 subscribers[token] = { token, subscriptions: [] };
             }
 
-            if (!isSubscribed(subscribers[token], subscription)) {
+            if (!isSubscribed(subscribers[token].subscriptions, subscription)) {
                 subscribers[token].endpointUrls.push(subscription);
                 fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
                     if (err) {
