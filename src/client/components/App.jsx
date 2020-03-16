@@ -191,8 +191,6 @@ export default class App extends Component {
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then(function(reg) {
-                console.log('Service Worker Registered!', reg);
-
                 reg.pushManager.getSubscription().then(function(sub) {
                     if (sub === null) {
                         // Update UI to ask user to register for Push
@@ -309,7 +307,7 @@ export default class App extends Component {
 
     saveSubscription = (subscription) => {
         const { userData: { token: userToken = null } } = this.state;
-        const body = JSON.stringify({ userToken, endpointUrl: subscription.endpoint });
+        const body = JSON.stringify({ userToken, subscription });
 
         request('/api/user-push-subscribe')
             .usePost()

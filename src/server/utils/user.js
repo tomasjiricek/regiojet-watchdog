@@ -33,6 +33,16 @@ function isAuthDataValid({ selectedImageIndex = null, size = null, pattern = nul
         || pattern.length === 0);
 }
 
+function isSubscribed(userSubscriptions, subscription) {
+    for (const i of userSubscriptions) {
+        const { endpointUrl } = userSubscriptions[i];
+        if (subscription.endpointUrl === endpointUrl) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function findUserByToken(token) {
     return new Promise((resolve, reject) => {
         fs.readFile(USERS_PATH, {}, (err, data) => {
@@ -99,13 +109,13 @@ function registerUser(authData) {
     });
 }
 
-function subscribeUserForWebPush(token, endpointUrl) {
+function subscribeUserForWebPush(token, subscription) {
     return findUserByToken(token)
-        .then(() => saveUserPushSubscription(token, endpointUrl));
+        .then(() => saveUserPushSubscription(token, subscription));
 
 }
 
-function saveUserPushSubscription(token, endpointUrl) {
+function saveUserPushSubscription(token, subscription) {
     return new Promise((resolve, reject) => {
         fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
             if (err) {
@@ -124,20 +134,21 @@ function saveUserPushSubscription(token, endpointUrl) {
             }
 
             if (subscribers[token] === undefined) {
-                subscribers[token] = { token, endpointUrls: [] };
+                subscribers[token] = { token, subscriptions: [] };
             }
 
-            if (subscribers[token].endpointUrls.indexOf(endpointUrl) === -1) {
-                subscribers[token].endpointUrls.push(endpointUrl);
-            }
-
-            fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
-                if (err) {
-                    reject({ code: 500, message: 'Failed to subscribe the user.' });
-                    return;
-                }
+            if (!isSubscribed(subscribers[token], subscription)) {
+                subscribers[token].endpointUrls.push(subscription);
+                fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
+                    if (err) {
+                        reject({ code: 500, message: 'Failed to subscribe the user.' });
+                        return;
+                    }
+                    resolve();
+                });
+            } else {
                 resolve();
-            });
+            }
         });
     });
 }
