@@ -4,7 +4,7 @@ const path = require('path');
 
 const DATA_PATH = path.join(__dirname, '../../../data');
 const USERS_PATH = path.join(DATA_PATH, 'users.json');
-const WEB_PUSH_SUBSCRIBERS_PATH = path.join(DATA_PATH, 'webPushSubscribers.json');
+const WEB_PUSH_SUBSCRIPTIONS_PATH = path.join(DATA_PATH, 'web-push-subscriptions.json');
 
 function getRandomDeviceId() {
     return crypto.randomBytes(35).toString('base64').replace(/[^a-z0-9]/gi, '');
@@ -107,9 +107,10 @@ function subscribeUserForWebPush(token, endpointUrl) {
 
 function saveUserPushSubscription(token, endpointUrl) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WEB_PUSH_SUBSCRIBERS_PATH, {}, (err, data) => {
+        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
             if (err) {
-                reject({ code: 500, message: 'Failed to load file with subscribers' });
+                createPushSubscriptionsFile();
+                reject({ code: 500, message: 'Failed to load file with subscribers. Try again later.' });
                 return;
             }
 
@@ -130,7 +131,7 @@ function saveUserPushSubscription(token, endpointUrl) {
                 subscribers[token].endpointUrls.push(endpointUrl);
             }
 
-            fs.writeFile(WEB_PUSH_SUBSCRIBERS_PATH, JSON.stringify(subscribers), (err) => {
+            fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
                 if (err) {
                     reject({ code: 500, message: 'Failed to subscribe the user.' });
                     return;
@@ -143,6 +144,10 @@ function saveUserPushSubscription(token, endpointUrl) {
 
 function createUsersFile() {
     fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
+}
+
+function createPushSubscriptionsFile() {
+    fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify({}), () => {});
 }
 
 module.exports = {
