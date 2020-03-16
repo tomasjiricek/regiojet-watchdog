@@ -13,6 +13,10 @@ if (!token) {
     return console.error('No token passed');
 }
 
+if (!subscriptions[token]) {
+    return console.error('User subscription not found');
+}
+
 webpush.setVapidDetails(
   'mailto:tjiricek11@gmail.com',
   secrets.webPushPublicKey,

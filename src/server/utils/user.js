@@ -114,15 +114,15 @@ function registerUser(authData) {
 
 function subscribeUserForWebPush(token, subscription) {
     return findUserByToken(token)
-        .then(() => saveUserPushSubscription(token, subscription));
+        .then(() => saveUserWebPushSubscription(token, subscription));
 
 }
 
-function saveUserPushSubscription(token, subscription) {
+function saveUserWebPushSubscription(token, subscription) {
     return new Promise((resolve, reject) => {
         fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
             if (err) {
-                createPushSubscriptionsFile();
+                createWebPushSubscriptionsFile();
                 reject({ code: 500, message: 'Failed to load file with subscribers. Try again later.' });
                 return;
             }
@@ -160,7 +160,7 @@ function createUsersFile() {
     fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
 }
 
-function createPushSubscriptionsFile() {
+function createWebPushSubscriptionsFile() {
     fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify({}), () => {});
 }
 
