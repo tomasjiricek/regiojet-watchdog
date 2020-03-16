@@ -1,20 +1,12 @@
-self.addEventListener('push', function(e) {
-    var options = {
-        body: 'This notification was generated from a push!',
-        icon: 'images/example.png',
-        vibrate: [100, 50, 100],
-        data: {
-            dateOfArrival: Date.now(),
-            primaryKey: '2'
-        },
-        actions: [
-            {action: 'explore', title: 'Explore this new world',
-                icon: 'images/checkmark.png'},
-            {action: 'close', title: 'Close',
-                icon: 'images/xmark.png'},
-        ]
+self.addEventListener('push', (event) => {
+    console.log(`[Service Worker] Push received. Data: "${event.data.text()}"`);
+
+    const options = {
+        body: event.data.text(),
+        icon: '/static/images/icons/icon-256.png',
     };
-    e.waitUntil(
-        self.registration.showNotification('Hello world!', options)
+
+    event.waitUntil(
+        self.registration.showNotification('RegioJet hlídač', options)
     );
 });
