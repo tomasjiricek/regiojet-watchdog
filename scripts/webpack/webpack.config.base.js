@@ -24,7 +24,7 @@ module.exports = {
             to: DIST_DIR
         }]),
         new DefinePlugin({
-            "WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY": secrets.webPushPublicKey
+            WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY: `"${secrets.webPushPublicKey}"`
         }),
         new CleanWebpackPlugin({
             cleanAfterEveryBuildPatterns: ['!static/**']

@@ -308,7 +308,7 @@ export default class App extends Component {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready
                 .then((reg) => {
-                    reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: "WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY" })
+                    reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY })
                         .then((sub) => {
                             console.log('Endpoint URL: ', sub.endpoint);
                         })
