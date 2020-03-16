@@ -68,13 +68,13 @@ router.post('/user-register', (req, res) => {
 
 router.post('/user-push-subscribe', (req, res) => {
     res.set('Content-Type', 'application/json');
-    const { body: { userToken = null, endpointUrl = null } } = req;
+    const { body: { userToken = null, subscription = null } } = req;
 
-    if (!userToken || !endpointUrl) {
+    if (!userToken || !(subscription instanceof Object)) {
         return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
-    subscribeUserForWebPush(userToken, endpointUrl)
+    subscribeUserForWebPush(userToken, subscription)
         .then(() => {
             res.status(200).send({ status: 'OK' });
         })
