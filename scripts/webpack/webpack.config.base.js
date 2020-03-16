@@ -1,7 +1,10 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { DefinePlugin } = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const secrets = require('../../data/secrets.json');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
@@ -16,10 +19,13 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({ template: path.join(RES_DIR, 'index.html') }),
         new CopyWebpackPlugin([{
-            test: /\.(png|svg|jpe?g|gif)$/,
+            test: /\.(png|svg|jpe?g|gif|js)$/,
             from: RES_DIR,
-            to: DIST_DIR 
+            to: DIST_DIR
         }]),
+        new DefinePlugin({
+            VAPID_PUBLIC_KEY: secrets.webPushPublicKey
+        }),
         new CleanWebpackPlugin({
             cleanAfterEveryBuildPatterns: ['!static/**']
         })

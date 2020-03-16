@@ -187,7 +187,7 @@ export default class App extends Component {
 
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(function(reg) {
+            navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then(function(reg) {
                 console.log('Service Worker Registered!', reg);
 
                 reg.pushManager.getSubscription().then(function(sub) {
@@ -308,20 +308,18 @@ export default class App extends Component {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready
                 .then((reg) => {
-                    reg.pushManager.subscribe({
-                    userVisibleOnly: true
-                })
-                .then((sub) => {
-                    console.log('Endpoint URL: ', sub.endpoint);
-                })
-                .catch((e) => {
-                    if (Notification.permission === 'denied') {
-                        console.warn('Permission for notifications was denied');
-                    } else {
-                        console.error('Unable to subscribe to push', e);
-                    }
+                    reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: VAPID_PUBLIC_KEY })
+                        .then((sub) => {
+                            console.log('Endpoint URL: ', sub.endpoint);
+                        })
+                        .catch((e) => {
+                            if (Notification.permission === 'denied') {
+                                console.warn('Permission for notifications was denied');
+                            } else {
+                                console.error('Unable to subscribe to push', e);
+                            }
+                        });
                 });
-            })
-        }
+            }
       }
 }
