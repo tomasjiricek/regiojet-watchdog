@@ -34,8 +34,7 @@ function isAuthDataValid({ selectedImageIndex = null, size = null, pattern = nul
 }
 
 function isSubscribed(userSubscriptions, subscription) {
-    for (const i of userSubscriptions) {
-        const item = userSubscriptions[i];
+    for (const item of userSubscriptions) {
         if (!(item instanceof Object)) {
             continue;
         }
