@@ -100,34 +100,41 @@ function registerUser(authData) {
 }
 
 function subscribeUserForWebPush(token, endpointUrl) {
-    fs.readFile(WEB_PUSH_SUBSCRIBERS_PATH, {}, (err, data) => {
-        if (err) {
-            return;
-        }
+    return findUserByToken(token)
+        .then(() => saveUserPushSubscription(token, endpointUrl));
 
-        let subscribers = {};
+}
 
-        try {
-            subscribers = JSON.parse(data);
-        } catch (_) {}
-
-        if (subscribers[token] === undefined) {
-            subscribers[token] = { token, endpointUrls: [] };
-        }
-
-        if (subscribers[token].endpointUrls.indexOf(endpointUrl) === -1) {
-            subscribers[token].endpointUrls.push(endpointUrl);
-        }
-
-        fs.writeFile(WEB_PUSH_SUBSCRIBERS_PATH, JSON.stringify(subscribers), (err) => {
+function saveUserPushSubscription(token, endpointUrl) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(WEB_PUSH_SUBSCRIBERS_PATH, {}, (err, data) => {
             if (err) {
-                reject({ code: 500, message: 'Failed to subscribe the user.' });
                 return;
             }
-            resolve();
+
+            let subscribers = {};
+
+            try {
+                subscribers = JSON.parse(data);
+            } catch (_) {}
+
+            if (subscribers[token] === undefined) {
+                subscribers[token] = { token, endpointUrls: [] };
+            }
+
+            if (subscribers[token].endpointUrls.indexOf(endpointUrl) === -1) {
+                subscribers[token].endpointUrls.push(endpointUrl);
+            }
+
+            fs.writeFile(WEB_PUSH_SUBSCRIBERS_PATH, JSON.stringify(subscribers), (err) => {
+                if (err) {
+                    reject({ code: 500, message: 'Failed to subscribe the user.' });
+                    return;
+                }
+                resolve();
+            });
         });
     });
-
 }
 
 function createUsersFile() {
