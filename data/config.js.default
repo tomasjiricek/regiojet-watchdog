@@ -1,7 +1,8 @@
 const path = require('path');
 
 const config = {
-    "listenOnPort": 3333,
+    "httpsMode": true,
+    "listenOnPort": 443,
     "certificatePath": {
         "crt": path.resolve(__dirname, 'sslcert', 'server.crt'),
         "key": path.resolve(__dirname, 'sslcert', 'server.key')

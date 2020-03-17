@@ -9,10 +9,6 @@ tr.route .tools a {
     color: #666;
 }
 
-tr.route .tools a:hover {
-    color: #000;
-}
-
 .btn-primary {
     color: #000 !important;
     background-color: #fbc901 !important;
@@ -52,4 +48,15 @@ tr.route .tools a:hover {
 
 .page-header, h1, h2 {
     margin-left: 20px;
+}
+
+.logout-button {
+    float: right;
+    margin: 2px 20px 0 0;
+}
+
+@media (hover: hover) {
+    tr.route .tools a:hover {
+        color: #000;
+    }
 }

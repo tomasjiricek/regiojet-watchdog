@@ -3,15 +3,17 @@
 }
 
 .knock-code .knock-code-grid {
+    margin-left: 20px;
     width: 200px;
     height: 200px;
 }
 
-.knock-code-grid td:hover {
-    background-color: #eee;
+.knock-code-grid tbody td {
+    border: 1px solid #666;
+    border-collapse: collapse;
 }
 
-.knock-code-grid td:active {
+.knock-code-grid tbody td:active {
     background-color: #ccc;
 }
 
@@ -39,6 +41,8 @@
     margin-right: 0;
 }
 
-.knock-code-grid {
-    margin-left: 20px;
+@media (hover: hover) {
+    .knock-code-grid td:hover {
+        background-color: #eee;
+    }
 }

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { PageHeader, Tab, Tabs } from 'react-bootstrap';
+import { PageHeader, Tab, Tabs, Button } from 'react-bootstrap';
 
 import About from './About';
 import MasterLogin from './Login/MasterLogin';
@@ -130,8 +130,12 @@ export default class App extends Component {
     }
 
     handleUserLogIn = (userData) => {
-        this.setState({ userData });
+        this.setState({ userData, userVerified: true });
         this.checkDeviceIdIsAuthorized();
+    }
+
+    handleUserLogOut = () => {
+        this.setState({ userData: null, userVerified: false, isAuthorized: false });
     }
 
     handleUserRegister = (userData) => {
@@ -188,6 +192,12 @@ export default class App extends Component {
         return state;
     }
 
+    renderLogOutButton() {
+        return (
+            <Button className="logout-button" onClick={this.handleUserLogOut}>Odhlásit</Button>
+        );
+    }
+
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then(function(reg) {
@@ -231,7 +241,14 @@ export default class App extends Component {
     }
 
     renderPageHeader(title) {
-        return <PageHeader>{title}</PageHeader>
+        const { userVerified } = this.state;
+
+        return (
+            <PageHeader>
+                {title}
+                {userVerified && this.renderLogOutButton()}
+            </PageHeader>
+        );
     }
 
     renderMasterLogin() {

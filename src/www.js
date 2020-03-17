@@ -1,6 +1,7 @@
 const argv = require('argv');
 const colors = require('colors/safe');
 const fs = require('fs');
+const http = require('http');
 const https = require('https');
 const path = require('path');
 
@@ -52,7 +53,7 @@ if (!port) {
     return;
 }
 
-const { certificatePath } = config;
+const { certificatePath, httpsMode } = config;
 
 if (!(certificatePath instanceof Object) || !certificatePath.crt || !certificatePath.key) {
     console.error(colors.red('Config is missing "certificatePath" property or the property is not object containing "crt" and "key" properties'));
@@ -63,14 +64,18 @@ const { crt: crtPath, key: keyPath } = certificatePath;
 
 try {
     service.initApp(args.devmode);
-    const server = https.createServer({
-        key: fs.readFileSync(keyPath, 'utf8'),
-        cert: fs.readFileSync(crtPath, 'utf8')
-    }, service.app);
+    const server = httpsMode
+        ? https.createServer(
+            {
+                key: fs.readFileSync(keyPath, 'utf8'),
+                cert: fs.readFileSync(crtPath, 'utf8')
+            },
+            service.app
+        ) : http.createServer(service.app);
     server.listen(port);
 
     console.log(colors.cyan(`\t---- Service is running ${args.devmode ? '(in dev mode) ' : ''}----`));
-    console.log(colors.green(`\n\tURL: https://localhost:${port}`));
+    console.log(colors.green(`\n\tURL: ${httpsMode ? 'https' : 'http'}://localhost:${port}`));
 } catch (e) {
     console.error(colors.red('Error:', e));
 }

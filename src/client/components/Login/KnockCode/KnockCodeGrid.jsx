@@ -1,70 +1,74 @@
 import React, { Component } from 'react';
 
-const COMBINATION_SUBMIT_TIMEOUT = 1000;
+const PATTERN_SUBMIT_TIMEOUT = 1500;
 
 export default class KnockCodeGrid extends Component {
     constructor(props) {
         super(props);
-        this.combination = [];
+        this.pattern = [];
         this.size = props.size;
-        this.combinationSubmitTimer = null;
+        this.patternSubmitTimer = null;
     }
 
     componentDidUpdate(prevProps) {
         if (this.props.size !== prevProps.size) {
-            this.combination = [];
+            this.pattern = [];
             this.removeSubmitTimer();
         }
     }
 
-    handleBoxClicked = (boxId) => {
-        if (this.combinationSubmitTimer) {
+    handleGridBlockClicked = (blockId, event) => {
+        event.preventDefault();
+
+        if (this.patternSubmitTimer) {
             this.removeSubmitTimer();
         }
-        this.combination.push(boxId);
-        this.combinationSubmitTimer = setTimeout(this.submitCombination, COMBINATION_SUBMIT_TIMEOUT);
+
+        this.pattern.push(blockId);
+        this.patternSubmitTimer = setTimeout(this.submitPattern, PATTERN_SUBMIT_TIMEOUT);
     }
 
-    submitCombination = () => {
-        this.props.onSubmit(this.props.size, this.combination);
-        this.combination = [];
+    submitPattern = () => {
+        this.props.onSubmit(this.props.size, this.pattern);
+        this.pattern = [];
         this.removeSubmitTimer();
     }
 
     removeSubmitTimer() {
-        clearTimeout(this.combinationSubmitTimer);
-        this.combinationSubmitTimer = null;
+        clearTimeout(this.patternSubmitTimer);
+        this.patternSubmitTimer = null;
     }
 
     render() {
-        return this.renderGrid();
+        return (
+            <table className="knock-code-grid">
+                <tbody>{this.renderGridRows()}</tbody>
+            </table>
+        );
     }
 
-    renderGrid() {
+    renderGridRows() {
         const { size } = this.props;
         const rows = [];
         const percentageSize = (100 / size) + '%';
-        const colStyle = {
-            width: percentageSize,
-            height: percentageSize,
-            border: `1px solid #666`,
-            borderCollapse: 'collapse',
-        };
+        const colStyle = { width: percentageSize, height: percentageSize};
 
         for (let i = 0; i < size; i++) {
             const cols = [];
             const offset = i * size;
             for (let j = offset; j < offset + size; j++) {
-                cols.push(<td key={j} style={colStyle} onClick={this.handleBoxClicked.bind(this, j)}></td>);
+                cols.push(
+                    <td
+                        key={j}
+                        style={colStyle}
+                        onMouseDown={this.handleGridBlockClicked.bind(this, j)}
+                    />
+                );
             }
 
             rows.push(<tr key={i}>{cols}</tr>);
         }
 
-        return (
-            <table className="knock-code-grid">
-                <tbody>{rows}</tbody>
-            </table>
-        );
+        return rows;
     }
 }
