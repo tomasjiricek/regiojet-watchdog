@@ -5,6 +5,8 @@ String.prototype.regexIndexOf = function(regex) {
 
 const CACHE_NAME = 'RJCacheStore';
 const CACHE_ASSETS = [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css',
+    'https://unpkg.com/react-bootstrap-typeahead/css/Typeahead.css',
     '/',
     '/index.html',
     '/static/images/security-images.jpg',
