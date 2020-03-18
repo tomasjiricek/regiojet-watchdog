@@ -60,6 +60,8 @@ self.addEventListener('push', (event) => {
     const options = {
         body: event.data.text(),
         icon: '/static/images/icons/icon-256.png',
+        tag: 'rj-watchdog-id',
+        renotify: true
     };
 
     event.waitUntil(
