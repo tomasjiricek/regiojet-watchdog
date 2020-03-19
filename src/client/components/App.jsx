@@ -19,12 +19,14 @@ const PERSISTENT_STATE_ITEMS = [
     'departureStation',
     'watchedRoutes',
     'userData',
-]
+];
 
 export default class App extends Component {
     constructor(props) {
         super(props);
         const loadedState = this.loadStateFromStorage();
+
+        this.pushSubscription = null;
         this.state = {
             activeContentTab: 1,
             date: getUTCISODate(new Date()),
@@ -200,16 +202,16 @@ export default class App extends Component {
 
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then(function(reg) {
-                reg.pushManager.getSubscription().then(function(sub) {
-                    if (sub === null) {
+            navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then((reg) => {
+                reg.pushManager.getSubscription().then((subscription) => {
+                    if (subscription === null) {
                         // Update UI to ask user to register for Push
                     } else {
-                        // We have a subscription, update the database
+                        this.pushSubscription = subscription;
                     }
                 });
             })
-            .catch(function(err) {
+            .catch((err) => {
                 console.info('Service Worker registration failed: ', err);
             });
         }
@@ -255,7 +257,7 @@ export default class App extends Component {
             return null;
         }
 
-        return <MasterLogin deviceId={userData.deviceId} onAuthorize={this.handleMasterLoginAuthorize} />;
+        return <MasterLogin deviceId={userData.deviceId} onAuthorize={this.handleMasterLoginAuthorize}/>;
     }
 
     renderUserLogin() {
@@ -321,6 +323,7 @@ export default class App extends Component {
     }
 
     saveSubscription = (subscription) => {
+        this.pushSubscription = subscription;
         const { userData: { token: userToken = null } } = this.state;
         const body = JSON.stringify({ userToken, subscription });
 
@@ -337,18 +340,17 @@ export default class App extends Component {
 
     subscribeForNotifications() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready
-                .then((reg) => {
-                    reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY })
-                        .then((sub) => this.saveSubscription(sub))
-                        .catch((e) => {
-                            if (Notification.permission === 'denied') {
-                                // Permission denied
-                            } else {
-                                console.error('Unable to subscribe to push.', e);
-                            }
-                        });
-                });
-            }
-      }
+            navigator.serviceWorker.ready.then((reg) => {
+                reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY })
+                    .then((sub) => this.saveSubscription(sub))
+                    .catch((e) => {
+                        if (Notification.permission === 'denied') {
+                            // Permission denied
+                        } else {
+                            console.error('Unable to subscribe to push.', e);
+                        }
+                    });
+            });
+        }
+    }
 }
