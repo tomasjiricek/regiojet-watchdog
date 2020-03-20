@@ -81,18 +81,22 @@ function notifyUser(token, notificationData) {
     return findSubscriberByToken(token)
         .then((subscriber) => {
             subscriber.subscriptions.forEach((subscription) => {
-                sendNotification(token, subscription, data);
-            })
+                sendNotification(token, subscription, data)
+                    .catch(() => {
+                        // Failed
+                    });
+            });
         });
 }
 
 function sendNotification(userToken, subscription, data) {
     const { message, ...options } = data;
-    webpush.sendNotification(subscription, message, options)
+    return webpush.sendNotification(subscription, message, options)
         .catch((error) => {
             if (error.statusCode === HTTP_ERROR_UNSUBSCRIBED_OR_EXPIRED) {
-                unsubscribeUser(userToken, subscription);
+                return unsubscribeUser(userToken, subscription);
             }
+            return Promise.reject(error);
         });
 }
 
