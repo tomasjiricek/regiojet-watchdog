@@ -11,8 +11,8 @@ if (!token) {
 }
 
 notifyUser(token, notificationData)
-    .then((data) => {
-        console.log('Success', data.statusCode);
+    .then(() => {
+        console.log('Success');
     })
     .catch((err) => {
         console.log('Error', err);
