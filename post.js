@@ -10,4 +10,10 @@ if (!token) {
     return console.error('No token passed');
 }
 
-notifyUser(token, notificationData);
+notifyUser(token, notificationData)
+    .then((data) => {
+        console.log('Success', data.statusCode);
+    })
+    .catch((err) => {
+        console.log('Error', err);
+    });
