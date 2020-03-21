@@ -120,7 +120,6 @@ export default class App extends Component {
     }
 
     handleDateChange = (date) => {
-        console.log(date);
         this.setState({ date });
     }
 
