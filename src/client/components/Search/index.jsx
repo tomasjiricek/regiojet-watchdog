@@ -47,7 +47,7 @@ class Search extends Component {
         const requestQuery = {
             arrivalStationId: arrivalStation.id,
             arrivalStationType: arrivalStation.isCity ? 'CITY' : 'STATION',
-            date,
+            date: date.split('T')[0],
             departureStationId: departureStation.id,
             departureStationType: departureStation.isCity ? 'CITY' : 'STATION',
             deviceId,
