@@ -15,6 +15,12 @@ tr.route .tools a {
     border-color: #cea606 !important;
 }
 
+.bg-primary {
+    color: #000 !important;
+    background-color: #fbc901 !important;
+    border-color: #cea606 !important;
+}
+
 .btn-primary:hover:not(:disabled), .btn-primary:focus:not(:disabled) {
     color: #000 !important;
     background-color: #d3a903 !important;

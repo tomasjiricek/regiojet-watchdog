@@ -1,18 +1,34 @@
 import React, { Component } from 'react';
-import { Button, Col, Form, FormControl, Glyphicon, Grid, FormGroup, InputGroup, Row } from 'react-bootstrap';
+import { Button, Col, Form, Glyphicon, Grid, FormGroup, InputGroup, Row } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import DatePicker from 'react-16-bootstrap-date-picker';
 
 import './selection.css';
 
+const DATEPICKER_DAY_LABELS = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
+const DATEPICKER_MONTH_LABELS = [
+    'led', 'úno', 'bře', 'dub', 'kvě', 'čvn', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'
+];
 const FILTER_FIELDS = ['name', 'fullname', 'country', 'city'];
+
+function addMonths(date, months) {
+    const day = date.getDate();
+    date.setMonth(date.getMonth() + +months);
+
+    if (date.getDate() !== day) {
+        date.setDate(0);
+    }
+
+    return date;
+}
 
 class Selection extends Component {
     handleTypeaheadPropChange = (isDeparture, selected) => {
         this.props.onStationChange(isDeparture, selected[0] || null);
     }
 
-    handleDateChange = (event) => {
-        this.props.onDateChange(event.target.value);
+    handleDateChange = (value) => {
+        this.props.onDateChange(value);
     }
 
     handleSubmit = () => {
@@ -24,19 +40,12 @@ class Selection extends Component {
     }
 
     render() {
-        const { arrivalStation, date, departureStation, loading } = this.props;
+        const { arrivalStation, departureStation, loading } = this.props;
         const disableSubmit = loading || !departureStation || !arrivalStation;
         return (
             <Grid fluid><Form className="search">
                 <Row>
-                    <Col sm={2}>
-                        <FormControl
-                            type="text"
-                            onChange={this.handleDateChange}
-                            value={date}
-                            placeholder="Datum"
-                        />
-                    </Col>
+                    <Col sm={2}>{this.renderDatePicker()}</Col>
                     <Col sm={8}>
                         <FormGroup>
                             <InputGroup className="search-inputs">
@@ -52,6 +61,38 @@ class Selection extends Component {
                 </Row>
             </Form></Grid>
         );
+    }
+
+    renderDatePicker() {
+        const { date } = this.props;
+
+        return (
+            <DatePicker
+                className="date-picker"
+                dateFormat="DD.MM.YYYY"
+                dayLabels={DATEPICKER_DAY_LABELS}
+                value={date}
+                minDate={new Date().toISOString()}
+                maxDate={addMonths(new Date(), 4).toISOString()}
+                monthLabels={DATEPICKER_MONTH_LABELS}
+                nextButtonElement={this.renderDatePickerNextMonthIcon()}
+                noInvalid
+                onChange={this.handleDateChange}
+                previousButtonElement={this.renderDatePickerPreviousMonthIcon()}
+                showClearButton={false}
+                showTodayButton
+                todayButtonLabel="Dnes"
+                weekStartsOn={1}
+            />
+        );
+    }
+
+    renderDatePickerNextMonthIcon() {
+        return <Glyphicon glyph="triangle-right"/>;
+    }
+
+    renderDatePickerPreviousMonthIcon() {
+        return <Glyphicon glyph="triangle-left"/>;
     }
 
     renderStationInput(placeholder, isDepartureInput) {
