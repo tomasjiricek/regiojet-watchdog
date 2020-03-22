@@ -71,6 +71,7 @@ router.post('/user-push-subscribe', (req, res) => {
     }
 
     findUserByToken(userToken)
+        .then((data) => isDeviceAuthorized(data.deviceId))
         .then(() => saveSubscription(userToken, subscription))
         .then(() => res.status(200).send({ status: 'OK' }))
         .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
