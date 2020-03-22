@@ -65,13 +65,5 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil(
         self.registration.showNotification('RegioJet hlídač', options)
-            .then((data) => {
-                self.navigator.vibrate([
-                    2,1,4,1,6,1,8,1,10,1,20,1,2,1,4,1,6,1,8,1,10,1,14,1,18,1,40,40,
-                    2,1,4,1,6,1,8,1,10,1,20,1,2,1,4,1,6,1,8,1,10,1,14,1,18,1,40,40,
-                    2,1,4,1,6,1,8,1,10,1,20,1,2,1,4,1,6,1,8,1,10,1,14,1,18,1,150
-                ]);
-                return Promise.resolve(data);
-            })
     );
 });
