@@ -153,7 +153,7 @@ function constructNotificationMessage({
     departureStation,
 }) {
     const action = currentFreeSeatsCount > 0
-        ? `se právě uvolnila místa! Aktuální počet míst je ${currentFreeSeatsCount}.`
+        ? `se právě uvolnila místa (${currentFreeSeatsCount})!`
         : `právě byla obsazena všechna místa!`;
 
     return `Ve vlaku ${departureStation} -> ${arrivalStation} ze dne ${date}, ${action}`;
