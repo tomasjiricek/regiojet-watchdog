@@ -13,7 +13,7 @@ function isRouteWatched(watchedRoutes, route) {
             continue;
         }
 
-        if (route.routeId === item.routeId) {
+        if (route.id === item.id) {
             return true;
         }
     }
@@ -46,7 +46,7 @@ function unwatchRoute(userToken, route) {
 
             if (isRouteWatched(watcher.routes, route)) {
                 watcher.routes = watcher.routes.filter((item) => (
-                    item.routeId !== route.routeId
+                    item.id !== route.id
                 ));
                 fs.writeFile(WATCHERS_PATH, JSON.stringify(watchers), (err) => {
                     if (err) {

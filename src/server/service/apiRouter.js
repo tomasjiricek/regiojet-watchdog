@@ -184,7 +184,7 @@ router.post('/watchdog/watch', (req, res) => {
     res.set('Content-Type', 'application/json');
     const { body: { userToken = null, route = null } } = req;
 
-    if (!userToken || !(route instanceof Object) || !route.routeId) {
+    if (!userToken || !(route instanceof Object) || !route.id) {
         return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
@@ -199,7 +199,7 @@ router.post('/watchdog/unwatch', (req, res) => {
     res.set('Content-Type', 'application/json');
     const { body: { userToken = null, route = null } } = req;
 
-    if (!userToken || !(route instanceof Object) || !route.routeId) {
+    if (!userToken || !(route instanceof Object) || !route.id) {
         return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
