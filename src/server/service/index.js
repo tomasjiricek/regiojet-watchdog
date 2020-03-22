@@ -1,11 +1,15 @@
 const express = require('express');
-const apiRouter = require('./apiRouter');
+const apiRouter = require('../routers/apiRouter');
 const compression = require('compression');
 
+const { checkRoutesOFAllWatchers } = require('./watchdog');
+
+const WATCHDOG_CHECK_INTERVAL = 20000;
 const app = express();
 
 function initApp(isDevMode = false) {
     app.use(compression());
+
     app.all('*', (_, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
@@ -13,11 +17,13 @@ function initApp(isDevMode = false) {
     });
 
     if (isDevMode) {
-        app.use('/', require('./staticRouter'));
+        app.use('/', require('../routers/staticRouter'));
         app.use('/api/', apiRouter);
     } else {
         app.use('/', apiRouter);
     }
+
+    setInterval(checkRoutesOFAllWatchers, WATCHDOG_CHECK_INTERVAL);
 }
 
 module.exports = {

@@ -15,7 +15,7 @@ class ApiHelper {
             }
         } = api;
 
-        const { 
+        const {
             urlArguments = {},
             query = {}
         } = options;
@@ -27,7 +27,7 @@ class ApiHelper {
         if (!this.hasMandatoryArguments(apiQuery, query)) {
             throw new ApiError(`Some mandatory query props are missing. Please define all of them: ${apiQuery.join(', ')}`);
         }
-        
+
         const processedUrl = this.processUrlTemplate(urlTemplate, urlArguments);
         return this.formatUrl(processedUrl, query);
     }
@@ -56,7 +56,7 @@ class ApiHelper {
         if (!(data instanceof Object)) {
             throw new ApiError(
                 `Arguments must be a valid Object.\n`
-                    + (args.length > 0 
+                    + (args.length > 0
                         ? `Expected object containing values for these keys:\n  ${args.join(', ')}\n`
                         : ''
                     )
@@ -77,7 +77,7 @@ class ApiHelper {
         let parsedUrl = urlTemplate;
 
         Object.keys(urlArguments).forEach((key) => {
-            const regExp = new RegExp(`\$\{${key}\}`, 'g');
+            const regExp = new RegExp(`\\$\\{${key}\\}`, 'g');
             parsedUrl = parsedUrl.replace(regExp, urlArguments[key]);
         });
 

@@ -1,10 +1,8 @@
 const fs = require('fs');
-const path = require('path');
 const webpush = require('web-push');
 
-const DATA_PATH = path.join(__dirname, '../../../data');
-const WEB_PUSH_SUBSCRIPTIONS_PATH = path.join(DATA_PATH, 'web-push-subscriptions.json');
-const secrets = require(path.join(DATA_PATH, 'secrets.json'));
+const { PATHS } = require('../../common/constants');
+const secrets = require(PATHS.SECRETS);
 
 const HTTP_ERROR_UNSUBSCRIBED_OR_EXPIRED = 410;
 const WEB_PUSH_OPTIONS = {
@@ -19,7 +17,7 @@ webpush.setVapidDetails(
 
 function findSubscriberByToken(token) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
+        fs.readFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, {}, (err, data) => {
             if (err) {
                 createWebPushSubscriptionsFile();
                 reject({ code: 410, message: 'Not found' });
@@ -54,7 +52,7 @@ function isSubscribed(userSubscriptions, subscription) {
 
 function unsubscribeUser(userToken, subscription) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
+        fs.readFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, {}, (err, data) => {
             if (err) {
                 createWebPushSubscriptionsFile();
                 reject({ code: 410, message: 'Not found' });
@@ -73,7 +71,7 @@ function unsubscribeUser(userToken, subscription) {
                     value.endpoint !== subscription.endpoint
                 ));
 
-                fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
+                fs.writeFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, JSON.stringify(subscribers), (err) => {
                     if (err) {
                         reject({ code: 500, message: 'Failed to delete invalid subscription'});
                         return;
@@ -104,7 +102,7 @@ function notifyUser(token, notificationData) {
 
 function saveSubscription(userToken, subscription) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
+        fs.readFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, {}, (err, data) => {
             if (err) {
                 createWebPushSubscriptionsFile();
                 reject({ code: 500, message: 'Failed to load file with subscribers. Try again later.' });
@@ -126,7 +124,7 @@ function saveSubscription(userToken, subscription) {
 
             if (!isSubscribed(subscribers[userToken].subscriptions, subscription)) {
                 subscribers[userToken].subscriptions.push(subscription);
-                fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
+                fs.writeFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, JSON.stringify(subscribers), (err) => {
                     if (err) {
                         reject({ code: 500, message: 'Failed to subscribe the user.' });
                         return;
@@ -152,7 +150,7 @@ function sendNotification(userToken, subscription, data) {
 }
 
 function createWebPushSubscriptionsFile() {
-    fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify({}), () => {});
+    fs.writeFile(PATHS.WEB_PUSH_SUBSCRIPTIONS, JSON.stringify({}), () => {});
 }
 
 module.exports = {

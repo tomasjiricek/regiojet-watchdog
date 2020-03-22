@@ -5,7 +5,7 @@ const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../comm
 const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../utils/masterLogin');
 const { findUserByToken, getUserByAuthData, registerUser } = require('../utils/user');
 const { saveSubscription } = require('../utils/pushNotification');
-const { watchRoute, unwatchRoute } = require('../utils/watchdog');
+const { watchRoute, unwatchRoute } = require('../utils/watcher');
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {

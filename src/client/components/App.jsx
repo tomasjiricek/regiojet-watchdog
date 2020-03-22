@@ -21,6 +21,20 @@ const PERSISTENT_STATE_ITEMS = [
     'userData',
 ];
 
+function getWatchedRouteIndex(watchedRoutes, route) {
+    for (let i = 0; i < watchedRoutes.length; i++) {
+        const item = watchedRoutes[i];
+        if (!(item instanceof Object)) {
+            continue;
+        }
+
+        if (route.id === item.id) {
+            return i;
+        }
+    }
+    return null;
+}
+
 export default class App extends Component {
     constructor(props) {
         super(props);
@@ -159,13 +173,17 @@ export default class App extends Component {
 
     handleToggleWatchdog = (route) => {
         const { watchedRoutes } = this.state;
-        let newWatchedRoutes = watchedRoutes.filter((item) => (item.id !== route.id));
+        const existingRouteIndex = getWatchedRouteIndex(watchedRoutes, route);
 
-        if (watchedRoutes.length === newWatchedRoutes.length) {
-            newWatchedRoutes.push(route);
+        if (existingRouteIndex !== null) {
+            watchedRoutes.splice(existingRouteIndex, 1);
+            this.unwatchRoute(route);
+        } else {
+            watchedRoutes.push(route);
+            this.watchRoute(route);
         }
 
-        this.setState({ watchedRoutes: newWatchedRoutes });
+        this.setState({ watchedRoutes });
     }
 
     handleWindowUnload = () => {
@@ -352,5 +370,29 @@ export default class App extends Component {
                     });
             });
         }
+    }
+
+    unwatchRoute(route) {
+        const { userData: { token: userToken } } = this.state;
+        const body = JSON.stringify({ userToken, route });
+
+        request('/api/watchdog/unwatch')
+            .usePost()
+            .send({ body })
+            .catch((_) => {
+                // Failed to unwatch the route
+            });
+    }
+
+    watchRoute(route) {
+        const { arrivalStation, departureStation, userData: { token: userToken } } = this.state;
+        const body = JSON.stringify({ userToken, route: { ...route, arrivalStation, departureStation } });
+
+        request('/api/watchdog/watch')
+            .usePost()
+            .send({ body })
+            .catch((_) => {
+                // Failed to watch the route
+            });
     }
 }

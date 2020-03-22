@@ -1,11 +1,11 @@
-/** 
+/**
  * Example search URL:
  * https://brn-ybus-pubapi.sa.cz/restapi/routes/search/simple
  *     ?departureDate=2020-01-31
  *     &tariffs=REGULAR
  *     &fromLocationId=372825000&fromLocationType=STATION
  *     &toLocationId=372842002&toLocationType=CITY
- * 
+ *
  * Example route detail URL
  * https://brn-ybus-pubapi.sa.cz/restapi/routes/<ID>/simple
  *     ?fromStationId=372825000
@@ -50,7 +50,8 @@ function getDestinations() {
 function getHttpsRequestPromise(requestOptions, callback) {
     return new Promise((resolve, reject) => {
         const request = https.get(requestOptions, responseProcessor.bind(null, callback.bind(null, resolve, reject)));
-        request.on('error', () => {
+        request.on('error', (error) => {
+            console.log(error);
             reject(new RJApiRequestError('Request failed'));
         });
     });
@@ -100,8 +101,8 @@ function responseProcessor(callback, res) {
     res.on('end', () => {
         try {
             const data = JSON.parse(rawData.toString());
-            statusCode === 200 
-                ? callback(null, data) 
+            statusCode === 200
+                ? callback(null, data)
                 : callback(new RJApiRequestError(`Request ended with code ${statusCode}`, { error: data, statusCode }));
         } catch (error) {
             callback(new RJApiRequestError(`Invalid received JSON. ${error.message}`, { error, statusCode }));

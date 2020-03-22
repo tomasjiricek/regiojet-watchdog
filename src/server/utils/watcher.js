@@ -1,31 +1,33 @@
 const fs = require('fs');
-const path = require('path');
 
-const WATCHERS_PATH = path.join(__dirname, '../../../data', 'watchers.json');
+const { PATHS } = require('../../common/constants');
 
 function createWatchersFile() {
-    fs.writeFile(WATCHED_ROUTES_PATH, JSON.stringify({}), () => {});
+    fs.writeFile(PATHS.WATCHERS, JSON.stringify({}), () => {});
 }
 
-function isRouteWatched(watchedRoutes, route) {
-    for (const item of watchedRoutes) {
+function getWatchedRouteIndex(watchedRoutes, routeId) {
+    for (let i = 0; i < watchedRoutes.length; i++) {
+        const item = watchedRoutes[i];
+
         if (!(item instanceof Object)) {
             continue;
         }
 
-        if (route.id === item.id) {
-            return true;
+        if (routeId === item.id) {
+            return i;
         }
     }
-    return false;
+    return null;
 }
 
 function unwatchRoute(userToken, route) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WATCHERS_PATH, (err, data) => {
+        fs.readFile(PATHS.WATCHERS, (err, data) => {
             let watchers = {};
 
             if (err) {
+                createWatchersFile();
                 reject({ code: 500, message: 'Failed to load watched routes.' });
                 return;
             }
@@ -43,12 +45,11 @@ function unwatchRoute(userToken, route) {
             }
 
             const watcher = watchers[userToken];
+            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route.id);
 
-            if (isRouteWatched(watcher.routes, route)) {
-                watcher.routes = watcher.routes.filter((item) => (
-                    item.id !== route.id
-                ));
-                fs.writeFile(WATCHERS_PATH, JSON.stringify(watchers), (err) => {
+            if (watchedRouteIndex !== null) {
+                watcher.routes.splice(watchedRouteIndex, 1);
+                fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), (err) => {
                     if (err) {
                         reject({ code: 500, message: 'Failed to unwatch the route.' });
                         return;
@@ -65,7 +66,7 @@ function unwatchRoute(userToken, route) {
 
 function watchRoute(userToken, route) {
     return new Promise((resolve, reject) => {
-        fs.readFile(WATCHERS_PATH, (err, data) => {
+        fs.readFile(PATHS.WATCHERS, (err, data) => {
             let watchers = { [userToken]: { token: userToken, routes: [] } };
 
             if (!err) {
@@ -81,10 +82,11 @@ function watchRoute(userToken, route) {
             }
 
             const watcher = watchers[userToken];
+            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route.id);
 
-            if (!isRouteWatched(watcher.routes, route)) {
+            if (watchedRouteIndex === null) {
                 watcher.routes.push(route);
-                fs.writeFile(WATCHERS_PATH, JSON.stringify(watchers), (err) => {
+                fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), (err) => {
                     if (err) {
                         reject({ code: 500, message: 'Failed to watch the route' });
                         return;
@@ -100,6 +102,7 @@ function watchRoute(userToken, route) {
 }
 
 module.exports = {
+    getWatchedRouteIndex,
     unwatchRoute,
     watchRoute
 };

@@ -1,16 +1,15 @@
 const crypto = require('crypto');
 const fs = require('fs');
-const path = require('path');
 
-const USERS_PATH = path.join(__dirname, '../../../data', 'users.json');
+const { PATHS } = require('../../common/constants');
 
 function createUsersFile() {
-    fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
+    fs.writeFile(PATHS.USERS, JSON.stringify({}), () => {});
 }
 
 function findUserByToken(token) {
     return new Promise((resolve, reject) => {
-        fs.readFile(USERS_PATH, {}, (err, data) => {
+        fs.readFile(PATHS.USERS, {}, (err, data) => {
             if (err) {
                 createUsersFile();
                 reject({ code: 410, message: 'User not found' });
@@ -68,7 +67,7 @@ function registerUser(authData) {
         const data = `C${pattern.join(':')}S${size}I${selectedImageIndex}`;
         const token = crypto.createHmac('sha256', 'RJ').update(data).digest('hex');
 
-        fs.readFile(USERS_PATH, {}, (err, data) => {
+        fs.readFile(PATHS.USERS, {}, (err, data) => {
             if (err) {
                 return;
             }
@@ -90,7 +89,7 @@ function registerUser(authData) {
                 token
             };
 
-            fs.writeFile(USERS_PATH, JSON.stringify(users), (err) => {
+            fs.writeFile(PATHS.USERS, JSON.stringify(users), (err) => {
                 if (err) {
                     reject({ code: 500, message: 'Failed to register the user. Try again later.' });
                     return;
