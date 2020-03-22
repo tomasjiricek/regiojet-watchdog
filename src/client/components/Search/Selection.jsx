@@ -3,6 +3,7 @@ import { Button, Col, Form, Glyphicon, Grid, FormGroup, InputGroup, Row } from '
 import { Typeahead } from 'react-bootstrap-typeahead';
 import DatePicker from 'react-16-bootstrap-date-picker';
 
+import 'react-bootstrap-typeahead/css/Typeahead.min.css';
 import './selection.css';
 
 const DATEPICKER_DAY_LABELS = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];

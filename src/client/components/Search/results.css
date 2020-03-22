@@ -2,8 +2,6 @@ tr.route.watched {
     background-color: #cfc;
 }
 
-@media (hover: hover) {
-    tr.route.watched:hover {
-        background-color: #afa;
-    }
+tr.route.watched:hover {
+    background-color: #afa;
 }
