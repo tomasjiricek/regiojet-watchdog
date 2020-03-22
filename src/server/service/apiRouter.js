@@ -3,7 +3,9 @@ const express = require('express');
 const { getDestinations, getRouteDetails, getTrainRoutes } = require('../api/regiojetApi');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
 const { authorizeDevice, isDeviceAuthorized, isPasswordValid } = require('../utils/masterLogin');
-const { findUserByToken, getUserByAuthData, registerUser, subscribeUserForWebPush } = require('../utils/user');
+const { findUserByToken, getUserByAuthData, registerUser } = require('../utils/user');
+const { saveSubscription } = require('../utils/pushNotification');
+const { watchRoute, unwatchRoute } = require('../utils/watchdog');
 
 function _sendError(response, data) {
     if (!(data instanceof Object)) {
@@ -25,9 +27,7 @@ router.post('/user-login', (req, res) => {
         const authData = JSON.parse(decodedData.toString());
 
         getUserByAuthData(authData)
-            .then((data) => {
-                res.status(200).send({ status: 'OK', data });
-            })
+            .then((data) => res.status(200).send({ status: 'OK', data }))
             .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
     } catch(_) {
@@ -40,9 +40,7 @@ router.post('/user-verify', (req, res) => {
     const { body: { userToken = null } } = req;
 
     findUserByToken(userToken)
-        .then((data) => {
-            res.status(200).send({ status: 'OK', data });
-        })
+        .then((data) => res.status(200).send({ status: 'OK', data }))
         .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
 });
@@ -56,9 +54,7 @@ router.post('/user-register', (req, res) => {
         const authData = JSON.parse(decodedData.toString());
 
         registerUser(authData)
-            .then((data) => {
-                res.status(200).send({ status: 'OK', data });
-            })
+            .then((data) => res.status(200).send({ status: 'OK', data }))
             .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
     } catch(_) {
@@ -74,10 +70,9 @@ router.post('/user-push-subscribe', (req, res) => {
         return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
-    subscribeUserForWebPush(userToken, subscription)
-        .then(() => {
-            res.status(200).send({ status: 'OK' });
-        })
+    findUserByToken(token)
+        .then(() => saveSubscription(token, subscription))
+        .then(() => res.status(200).send({ status: 'OK' }))
         .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
 });
@@ -102,14 +97,6 @@ router.get('/destinations', (req, res) => {
                 .catch((error) => _sendError(res, { statusCode: 500, error }));
         })
         .catch((error) => _sendError(res, { statusCode: 403, error }))
-
-});
-
-router.get('/device-id', (_, res) => {
-    res.set('Content-Type', 'application/json');
-    getRandomDeviceId()
-        .then((data) => res.status(200).send({ status: 'OK', data }))
-        .catch((error) => _sendError(res, { statusCode: 500, error }));
 
 });
 
@@ -191,6 +178,36 @@ router.get('/route/:routeId([0-9]+)/detail', (req, res) => {
             })
         .catch((error) => _sendError(res, { statusCode: 403, error }))
 
+});
+
+router.post('/watchdog/watch', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body: { userToken = null, route = null } } = req;
+
+    if (!userToken || !(route instanceof Object) || !route.routeId) {
+        return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
+    }
+
+    findUserByToken(userToken)
+        .then((data) => isDeviceAuthorized(data.deviceId))
+        .then(() => watchRoute(userToken, route))
+        .then(() => res.status(200).send({ status: 'OK' }))
+        .catch((error) => _sendError(res, { statusCode: error.code || 403, error }));
+});
+
+router.post('/watchdog/unwatch', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const { body: { userToken = null, route = null } } = req;
+
+    if (!userToken || !(route instanceof Object) || !route.routeId) {
+        return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
+    }
+
+    findUserByToken(userToken)
+        .then((data) => isDeviceAuthorized(data.deviceId))
+        .then(() => unwatchRoute(userToken, route))
+        .then(() => res.status(200).send({ status: 'OK' }))
+        .catch((error) => _sendError(res, { statusCode: error.code || 403, error }));
 });
 
 module.exports = router;

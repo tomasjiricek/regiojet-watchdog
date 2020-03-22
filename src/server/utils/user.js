@@ -2,9 +2,33 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const DATA_PATH = path.join(__dirname, '../../../data');
-const USERS_PATH = path.join(DATA_PATH, 'users.json');
-const WEB_PUSH_SUBSCRIPTIONS_PATH = path.join(DATA_PATH, 'web-push-subscriptions.json');
+const USERS_PATH = path.join(__dirname, '../../../data', 'users.json');
+
+function createUsersFile() {
+    fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
+}
+
+function findUserByToken(token) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(USERS_PATH, {}, (err, data) => {
+            if (err) {
+                createUsersFile();
+                reject({ code: 410, message: 'User not found' });
+                return;
+            }
+            try {
+                const users = JSON.parse(data);
+                if (users[token]) {
+                    resolve(users[token]);
+                    return;
+                }
+            } catch (_) {
+                createUsersFile();
+            }
+            reject({ code: 410, message: 'User not found' });
+        });
+    });
+}
 
 function getRandomDeviceId() {
     return crypto.randomBytes(35).toString('base64').replace(/[^a-z0-9]/gi, '');
@@ -31,40 +55,6 @@ function isAuthDataValid({ selectedImageIndex = null, size = null, pattern = nul
     return (selectedImageIndex === null || size === null || pattern === null
         || isNaN(selectedImageIndex) || isNaN(size) || !(pattern instanceof Array)
         || pattern.length === 0);
-}
-
-function isSubscribed(userSubscriptions, subscription) {
-    for (const item of userSubscriptions) {
-        if (!(item instanceof Object)) {
-            continue;
-        }
-        if (subscription.endpoint === item.endpoint) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function findUserByToken(token) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(USERS_PATH, {}, (err, data) => {
-            if (err) {
-                createUsersFile();
-                reject({ code: 403, message: 'User not found' });
-                return;
-            }
-            try {
-                const users = JSON.parse(data);
-                if (users[token]) {
-                    resolve(users[token]);
-                    return;
-                }
-            } catch (_) {
-                createUsersFile();
-            }
-            reject({ code: 403, message: 'User not found' });
-        });
-    });
 }
 
 function registerUser(authData) {
@@ -111,61 +101,8 @@ function registerUser(authData) {
     });
 }
 
-function subscribeUserForWebPush(token, subscription) {
-    return findUserByToken(token)
-        .then(() => saveUserWebPushSubscription(token, subscription));
-
-}
-
-function saveUserWebPushSubscription(token, subscription) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
-            if (err) {
-                createWebPushSubscriptionsFile();
-                reject({ code: 500, message: 'Failed to load file with subscribers. Try again later.' });
-                return;
-            }
-
-            let subscribers = {};
-
-            try {
-                subscribers = JSON.parse(data);
-            } catch (_) {
-                reject({ code: 500, message: 'Failed to parse file with subscribers' });
-                return;
-            }
-
-            if (subscribers[token] === undefined) {
-                subscribers[token] = { token, subscriptions: [] };
-            }
-
-            if (!isSubscribed(subscribers[token].subscriptions, subscription)) {
-                subscribers[token].subscriptions.push(subscription);
-                fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
-                    if (err) {
-                        reject({ code: 500, message: 'Failed to subscribe the user.' });
-                        return;
-                    }
-                    resolve();
-                });
-            } else {
-                resolve();
-            }
-        });
-    });
-}
-
-function createUsersFile() {
-    fs.writeFile(USERS_PATH, JSON.stringify({}), () => {});
-}
-
-function createWebPushSubscriptionsFile() {
-    fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify({}), () => {});
-}
-
 module.exports = {
     findUserByToken,
     getUserByAuthData,
-    registerUser,
-    subscribeUserForWebPush
+    registerUser
 };

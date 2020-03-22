@@ -22,7 +22,7 @@ function findSubscriberByToken(token) {
         fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
             if (err) {
                 createWebPushSubscriptionsFile();
-                reject({ code: 404, message: 'Not found' });
+                reject({ code: 410, message: 'Not found' });
                 return;
             }
             try {
@@ -34,9 +34,22 @@ function findSubscriberByToken(token) {
             } catch (_) {
                 createWebPushSubscriptionsFile();
             }
-            reject({ code: 404, message: 'Not found' });
+            reject({ code: 410, message: 'Not found' });
         });
     });
+}
+
+
+function isSubscribed(userSubscriptions, subscription) {
+    for (const item of userSubscriptions) {
+        if (!(item instanceof Object)) {
+            continue;
+        }
+        if (subscription.endpoint === item.endpoint) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function unsubscribeUser(userToken, subscription) {
@@ -44,14 +57,14 @@ function unsubscribeUser(userToken, subscription) {
         fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
             if (err) {
                 createWebPushSubscriptionsFile();
-                reject({ code: 404, message: 'Not found' });
+                reject({ code: 410, message: 'Not found' });
                 return;
             }
 
             try {
                 const subscribers = JSON.parse(data);
                 if (!subscribers[userToken]) {
-                    reject({ code: 404, message: 'Not found' });
+                    reject({ code: 410, message: 'Not found' });
                     return;
                 }
 
@@ -70,7 +83,7 @@ function unsubscribeUser(userToken, subscription) {
 
             } catch (_) {
                 createWebPushSubscriptionsFile();
-                reject({ code: 404, message: 'Not found' });
+                reject({ code: 410, message: 'Not found' });
             }
         });
     });
@@ -87,6 +100,44 @@ function notifyUser(token, notificationData) {
                     });
             });
         });
+}
+
+function saveSubscription(userToken, subscription) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(WEB_PUSH_SUBSCRIPTIONS_PATH, {}, (err, data) => {
+            if (err) {
+                createWebPushSubscriptionsFile();
+                reject({ code: 500, message: 'Failed to load file with subscribers. Try again later.' });
+                return;
+            }
+
+            let subscribers = {};
+
+            try {
+                subscribers = JSON.parse(data);
+            } catch (_) {
+                reject({ code: 500, message: 'Failed to parse file with subscribers' });
+                return;
+            }
+
+            if (subscribers[userToken] === undefined) {
+                subscribers[userToken] = { token: userToken, subscriptions: [] };
+            }
+
+            if (!isSubscribed(subscribers[userToken].subscriptions, subscription)) {
+                subscribers[userToken].subscriptions.push(subscription);
+                fs.writeFile(WEB_PUSH_SUBSCRIPTIONS_PATH, JSON.stringify(subscribers), (err) => {
+                    if (err) {
+                        reject({ code: 500, message: 'Failed to subscribe the user.' });
+                        return;
+                    }
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+        });
+    });
 }
 
 function sendNotification(userToken, subscription, data) {
@@ -106,5 +157,6 @@ function createWebPushSubscriptionsFile() {
 
 module.exports = {
     notifyUser,
-    unsubscribeUser,
+    saveSubscription,
+    unsubscribeUser
 };
