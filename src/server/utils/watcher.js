@@ -6,7 +6,8 @@ function createWatchersFile() {
     fs.writeFile(PATHS.WATCHERS, JSON.stringify({}), () => {});
 }
 
-function getWatchedRouteIndex(watchedRoutes, routeId) {
+function getWatchedRouteIndex(watchedRoutes, route) {
+    const { arrivalStationId, departureStationId, id: routeId } = route;
     for (let i = 0; i < watchedRoutes.length; i++) {
         const item = watchedRoutes[i];
 
@@ -14,7 +15,11 @@ function getWatchedRouteIndex(watchedRoutes, routeId) {
             continue;
         }
 
-        if (routeId === item.id) {
+        if (
+            routeId === item.id &&
+            arrivalStationId === item.arrivalStationId &&
+            departureStationId === item.departureStationId
+        ) {
             return i;
         }
     }
@@ -45,7 +50,7 @@ function unwatchRoute(userToken, route) {
             }
 
             const watcher = watchers[userToken];
-            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route.id);
+            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
 
             if (watchedRouteIndex !== null) {
                 watcher.routes.splice(watchedRouteIndex, 1);
@@ -82,7 +87,7 @@ function watchRoute(userToken, route) {
             }
 
             const watcher = watchers[userToken];
-            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route.id);
+            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
 
             if (watchedRouteIndex === null) {
                 watcher.routes.push(route);

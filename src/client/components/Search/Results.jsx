@@ -19,9 +19,13 @@ class Results extends Component {
         this.props.onToggleWatchdog(route);
     }
 
-    isRouteWatched(routeId) {
-        for (const route of this.props.watchedRoutes) {
-            if (route.id === routeId) {
+    isRouteWatched({ arrivalStationId, departureStationId, id: routeId }) {
+        for (const item of this.props.watchedRoutes) {
+            if (
+                routeId === item.id &&
+                arrivalStationId === item.arrivalStationId &&
+                departureStationId === item.departureStationId
+            ) {
                 return true;
             }
         }
@@ -54,7 +58,7 @@ class Results extends Component {
 
     renderResultRow(route) {
         const { id, departureTime, travelTime, freeSeatsCount, transfersCount } = route;
-        const isWatched = this.isRouteWatched(id);
+        const isWatched = this.isRouteWatched(route);
         let className = 'route';
         if (isWatched) {
             className += ' watched';

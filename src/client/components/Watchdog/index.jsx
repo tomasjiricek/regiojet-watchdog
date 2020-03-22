@@ -10,7 +10,7 @@ export default class Watchdog extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            displayedRouteDetailId: null,
+            displayedRoute: null,
         };
     }
 
@@ -18,8 +18,25 @@ export default class Watchdog extends Component {
         this.props.onUnwatch(route);
     }
 
-    toggleRouteDetailVisibility = (routeId) => {
-        this.setState({ displayedRouteDetailId: this.state.displayedRouteDetailId === routeId ? null : routeId });
+    isRouteDisplayed(route) {
+        const { displayedRoute } = this.state;
+
+        if (route === null || displayedRoute === null) {
+            return false;
+        }
+
+        const { arrivalStationId, departureStationId, id: routeId } = route;
+
+        return (
+
+            routeId === displayedRoute.id &&
+            arrivalStationId === displayedRoute.arrivalStationId &&
+            departureStationId === displayedRoute.departureStationId
+        );
+    }
+
+    toggleRouteDetailVisibility = (route) => {
+        this.setState({ displayedRoute: this.isRouteDisplayed(route) ? null : route });
     }
 
     render() {
@@ -56,12 +73,12 @@ export default class Watchdog extends Component {
     }
 
     renderTableRow(route) {
-        const { id } = route;
+        const { arrivalStationId, departureStationId, id } = route;
         const { displayedRouteDetailId } = this.state;
 
         return (
-            <Fragment key={id}>
-                {displayedRouteDetailId === id
+            <Fragment key={`${id}-${arrivalStationId}-${departureStationId}`}>
+                {this.isRouteDisplayed(route)
                     ? this.renderRouteDetailRow(route)
                     : this.renderBasicRouteInfo(route)
                 }
@@ -70,11 +87,19 @@ export default class Watchdog extends Component {
     }
 
     renderBasicRouteInfo(route) {
-        const { id, departureTime, freeSeatsCount, transfersCount, travelTime } = route;
+        const {
+            departureTime,
+            freeSeatsCount,
+            transfersCount,
+            travelTime
+        } = route;
         const date = new Date(departureTime);
 
         return (
-            <Row className="route" onClick={this.toggleRouteDetailVisibility.bind(this, id)}>
+            <Row
+                className="route"
+                onClick={this.toggleRouteDetailVisibility.bind(this, route)}
+            >
                 <Col>{`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`}</Col>
                 <Col>{freeSeatsCount}</Col>
                 <Col>{travelTime}</Col>

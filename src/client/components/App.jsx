@@ -22,13 +22,18 @@ const PERSISTENT_STATE_ITEMS = [
 ];
 
 function getWatchedRouteIndex(watchedRoutes, route) {
+    const { arrivalStationId, departureStationId, id: routeId } = route;
     for (let i = 0; i < watchedRoutes.length; i++) {
         const item = watchedRoutes[i];
         if (!(item instanceof Object)) {
             continue;
         }
 
-        if (route.id === item.id) {
+        if (
+            routeId === item.id &&
+            arrivalStationId === item.arrivalStationId &&
+            departureStationId === item.departureStationId
+        ) {
             return i;
         }
     }
