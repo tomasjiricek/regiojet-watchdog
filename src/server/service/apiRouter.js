@@ -70,8 +70,8 @@ router.post('/user-push-subscribe', (req, res) => {
         return _sendError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
-    findUserByToken(token)
-        .then(() => saveSubscription(token, subscription))
+    findUserByToken(userToken)
+        .then(() => saveSubscription(userToken, subscription))
         .then(() => res.status(200).send({ status: 'OK' }))
         .catch((error) => _sendError(res, { statusCode: error.code || 500, error }));
 
