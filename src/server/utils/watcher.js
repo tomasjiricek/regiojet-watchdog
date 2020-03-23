@@ -33,7 +33,7 @@ function getWatchedRoutes(userToken) {
                 watchers[userToken] = { token: userToken, routes: [] };
                 fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), () => {});
             }
-            return Promise.resolve(watchers[userToken]);
+            return Promise.resolve(watchers[userToken].routes);
         })
         .catch((error) => Promise.reject({ code: error.statusCode, message: error.message }));
 }
