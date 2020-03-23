@@ -12,7 +12,7 @@ function findUserByToken(token) {
         fs.readFile(PATHS.USERS, {}, (err, data) => {
             if (err) {
                 createUsersFile();
-                reject({ code: 410, message: 'User not found' });
+                reject({ code: 403, message: 'User not found' });
                 return;
             }
             try {
@@ -24,7 +24,7 @@ function findUserByToken(token) {
             } catch (_) {
                 createUsersFile();
             }
-            reject({ code: 410, message: 'User not found' });
+            reject({ code: 403, message: 'User not found' });
         });
     });
 }
