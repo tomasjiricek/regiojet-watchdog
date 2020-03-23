@@ -17,7 +17,6 @@ const PERSISTENT_STATE_ITEMS = [
     'activeContentTab',
     'arrivalStation',
     'departureStation',
-    'watchedRoutes',
     'userData',
 ];
 
@@ -49,7 +48,7 @@ export default class App extends Component {
         this.state = {
             activeContentTab: 1,
             date: getUTCISODate(new Date()),
-            watchedRoutes: [],
+            watchedRoutes: null,
             arrivalStation: null,
             departureStation: null,
             isAuthorized: false,
@@ -78,8 +77,12 @@ export default class App extends Component {
     }
 
     componentDidUpdate(_, prevState) {
-        if (this.state.userVerified && this.state.userVerified !== prevState.userVerified) {
+        const { isAuthorized, loading, userData, userVerified, watchedRoutes } = this.state;
+        if (userVerified && userVerified !== prevState.userVerified) {
             this.checkDeviceIdIsAuthorized();
+        }
+        if (!loading && userData !== null && userVerified && isAuthorized && watchedRoutes === null) {
+            this.loadWatchedRoutes();
         }
     }
 
@@ -150,13 +153,18 @@ export default class App extends Component {
         this.setState({ isAuthorized: true });
     }
 
+    handleReloadRoutesClick = (event) => {
+        event.preventDefault();
+        this.loadWatchedRoutes();
+    }
+
     handleUserLogIn = (userData) => {
         this.setState({ userData, userVerified: true });
         this.checkDeviceIdIsAuthorized();
     }
 
     handleUserLogOut = () => {
-        this.setState({ userData: null, userVerified: false, isAuthorized: false });
+        this.setState({ userData: null, userVerified: false, isAuthorized: false, watchedRoutes: null });
     }
 
     handleUserRegister = (userData) => {
@@ -215,6 +223,28 @@ export default class App extends Component {
         }
 
         return state;
+    }
+
+    loadWatchedRoutes() {
+        const { token: userToken = null } = this.state.userData;
+
+        if (userToken === null) {
+            return;
+        }
+
+        this.setState({ loading: true });
+        const body = JSON.stringify( { userToken });
+        request('/api/watchdog/routes')
+            .usePost()
+            .send({ body })
+            .then((res) => {
+                if (res.status !== 200) {
+                    return Promise.reject();
+                }
+                return res.json();
+            })
+            .then((res) => this.setState({ loading: false, watchedRoutes: res.data }))
+            .catch(() => this.setState({ loading: false }));
     }
 
     renderLogOutButton() {
@@ -325,14 +355,18 @@ export default class App extends Component {
     }
 
     renderWatchdogTab() {
-        const { userData, watchedRoutes } = this.state;
+        const { userData: { deviceId }, watchedRoutes } = this.state;
         return (
             <Tab eventKey={2} title="Sledované spoje">
-                <Watchdog
-                    deviceId={userData.deviceId}
-                    routes={watchedRoutes}
-                    onUnwatch={this.handleToggleWatchdog}
-                />
+                {watchedRoutes !== null
+                    ? <Watchdog deviceId={deviceId} routes={watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
+                    : (
+                        <h3>
+                            Chyba při načítání sledovaných spojů.
+                            <a href="" onClick={this.handleReloadRoutesClick}>Zkusit znovu</a>
+                        </h3>
+                    )
+                }
             </Tab>
         );
     }
