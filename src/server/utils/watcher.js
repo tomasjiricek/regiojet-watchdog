@@ -29,10 +29,11 @@ function getWatchedRouteIndex(watchedRoutes, route) {
 function getWatchedRoutes(userToken) {
     return getWatchers()
         .then((watchers) => {
-            if (watchers[userToken] !== undefined) {
-                return Promise.resolve(watchers[userToken].routes);
+            if (watchers[userToken] === undefined) {
+                watchers[userToken] = { token: userToken, routes: [] };
+                fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), () => {});
             }
-            return Promise.reject({ code: 410, message: 'User\'s watched routes not found' });
+            return Promise.resolve(watchers[userToken]);
         })
         .catch((error) => Promise.reject({ code: error.statusCode, message: error.message }));
 }

@@ -340,21 +340,33 @@ export default class App extends Component {
         return <Tab eventKey={3} title="O aplikaci"><About/></Tab>;
     }
 
+    renderErrorLoadingWatchedRoutes() {
+        return (
+            <h3>
+                Chyba při načítání sledovaných spojů.
+                <a href="" onClick={this.handleReloadRoutesClick}>Zkusit znovu</a>
+            </h3>
+        );
+    }
+
     renderSearchTab() {
         const { arrivalStation, date, departureStation, userData, watchedRoutes } = this.state;
         return (
             <Tab eventKey={1} title="Vyhledávání">
-                <Search
-                    arrivalStation={arrivalStation}
-                    date={date}
-                    departureStation={departureStation}
-                    deviceId={userData.deviceId}
-                    watchedRoutes={watchedRoutes}
-                    onDateChange={this.handleDateChange}
-                    onStationChange={this.handleStationChange}
-                    onStationsSwap={this.handleStationsSwap}
-                    onToggleWatchdog={this.handleToggleWatchdog}
-                />
+                {watchedRoutes !== null && !(watchedRoutes instanceof Error)
+                    ? <Search
+                        arrivalStation={arrivalStation}
+                        date={date}
+                        departureStation={departureStation}
+                        deviceId={userData.deviceId}
+                        watchedRoutes={watchedRoutes}
+                        onDateChange={this.handleDateChange}
+                        onStationChange={this.handleStationChange}
+                        onStationsSwap={this.handleStationsSwap}
+                        onToggleWatchdog={this.handleToggleWatchdog}
+                    />
+                    : this.renderErrorLoadingWatchedRoutes()
+                }
             </Tab>
         );
     }
@@ -365,12 +377,7 @@ export default class App extends Component {
             <Tab eventKey={2} title="Sledované spoje">
                 {watchedRoutes !== null && !(watchedRoutes instanceof Error)
                     ? <Watchdog deviceId={deviceId} routes={watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
-                    : (
-                        <h3>
-                            Chyba při načítání sledovaných spojů.
-                            <a href="" onClick={this.handleReloadRoutesClick}>Zkusit znovu</a>
-                        </h3>
-                    )
+                    : this.renderErrorLoadingWatchedRoutes()
                 }
             </Tab>
         );
