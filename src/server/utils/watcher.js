@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const { PATHS } = require('../../common/constants');
-
+const { WatchdogError } = require('../../common/ErrorTypes');
 function createWatchersFile() {
     fs.writeFile(PATHS.WATCHERS, JSON.stringify({}), () => {});
 }
@@ -26,46 +26,57 @@ function getWatchedRouteIndex(watchedRoutes, route) {
     return null;
 }
 
-function unwatchRoute(userToken, route) {
+function getWatchedRoutes(userToken) {
+    return getWatchers()
+        .then((watchers) => {
+            if (watchers[userToken] !== undefined) {
+                return Promise.resolve(watchers[userToken].routes);
+            }
+            return Promise.reject({ code: 410, message: 'User\'s watched routes not found' });
+        })
+        .catch((error) => Promise.reject({ code: error.statusCode, message: error.message }));
+}
+
+function getWatchers() {
     return new Promise((resolve, reject) => {
         fs.readFile(PATHS.WATCHERS, (err, data) => {
-            let watchers = {};
-
             if (err) {
                 createWatchersFile();
-                reject({ code: 500, message: 'Failed to load watched routes.' });
+                reject(new WatchdogError('Failed to load watched routes.', 500));
                 return;
             }
 
             try {
-                watchers = JSON.parse(data);
+                const watchers = JSON.parse(data);
+                resolve(watchers);
             } catch (error) {
-                reject({ code: 500, message: 'Failed to parse watched routes.' });
-                return;
+                reject(new WatchdogError('Failed to parse watched routes.', 500));
             }
-
-            if (watchers[userToken] === undefined) {
-                reject({ code: 410, message: 'No watched routes.' });
-                return;
-            }
-
-            const watcher = watchers[userToken];
-            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
-
-            if (watchedRouteIndex !== null) {
-                watcher.routes.splice(watchedRouteIndex, 1);
-                fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), (err) => {
-                    if (err) {
-                        reject({ code: 500, message: 'Failed to unwatch the route.' });
-                        return;
-                    }
-                    resolve();
-                });
-            } else {
-                reject({ code: 410, message: 'The route is not watched.' });
-            }
-
         });
+    });
+}
+
+function unwatchRoute(userToken, route) {
+    return new Promise((resolve, reject) => {
+        getWatchers()
+            .then((watchers) => {
+                const watcher = watchers[userToken];
+                const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
+
+                if (watchedRouteIndex !== null) {
+                    watcher.routes.splice(watchedRouteIndex, 1);
+                    fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), (err) => {
+                        if (err) {
+                            reject({ code: 500, message: 'Failed to unwatch the route.' });
+                            return;
+                        }
+                        resolve();
+                    });
+                } else {
+                    reject({ code: 410, message: 'The route is not watched.' });
+                }
+            })
+            .catch((error) => reject({ code: error.statusCode || 500, message: error.message }));
     });
 }
 
@@ -108,6 +119,8 @@ function watchRoute(userToken, route) {
 
 module.exports = {
     getWatchedRouteIndex,
+    getWatchedRoutes,
+    getWatchers,
     unwatchRoute,
     watchRoute
 };

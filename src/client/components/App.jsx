@@ -96,7 +96,7 @@ export default class App extends Component {
         }
 
         this.setState({ loading: true });
-        const req = request('/api/user-verify');
+        const req = request('/api/user/verify');
         req.usePost();
         const body = JSON.stringify({ userToken });
         req.send({ body })
@@ -350,7 +350,7 @@ export default class App extends Component {
         const { userData: { token: userToken = null } } = this.state;
         const body = JSON.stringify({ userToken, subscription });
 
-        request('/api/user-push-subscribe')
+        request('/api/user/push-subscribe')
             .usePost()
             .send({ body })
             .then(() => {

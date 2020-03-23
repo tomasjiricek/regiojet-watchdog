@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+
 const router = express.Router();
 
 router.use('/static/sw.js', (_, res, next) => {
@@ -7,6 +8,6 @@ router.use('/static/sw.js', (_, res, next) => {
     next();
 });
 
-router.use('/', express.static(path.join(__dirname, '../../../dist'), ));
+router.use('/', express.static(path.join(__dirname, '../../../../dist'), ));
 
 module.exports = router;

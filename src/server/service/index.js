@@ -1,5 +1,5 @@
 const express = require('express');
-const apiRouter = require('../routers/apiRouter');
+const apiRouter = require('../routers/api');
 const compression = require('compression');
 
 const { checkRoutesOFAllWatchers } = require('./watchdog');
@@ -17,8 +17,8 @@ function initApp(isDevMode = false) {
     });
 
     if (isDevMode) {
-        app.use('/', require('../routers/staticRouter'));
-        app.use('/api/', apiRouter);
+        app.use('/', require('../routers/static'));
+        app.use('/api', apiRouter);
     } else {
         app.use('/', apiRouter);
     }

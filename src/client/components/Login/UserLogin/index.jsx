@@ -26,7 +26,7 @@ export default class UserLogin extends Component {
         const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
         const body = JSON.stringify({ token: encodedData });
 
-        request('/api/user-login')
+        request('/api/user/login')
             .usePost()
             .send({ body })
             .then((res) => {
@@ -44,7 +44,7 @@ export default class UserLogin extends Component {
         const encodedData = this.encodeLoginData(securityImageIndex, knockCodeData);
         const body = JSON.stringify({ token: encodedData });
 
-        request('/api/user-register')
+        request('/api/user/register')
             .usePost()
             .send({ body })
             .then((res) => {

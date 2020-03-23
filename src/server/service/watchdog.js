@@ -3,12 +3,8 @@ const fs = require('fs');
 const { WatchdogError } = require('../../common/ErrorTypes');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS, PATHS } = require('../../common/constants');
 const { getRouteDetails } = require('../api/regiojetApi');
-const { getWatchedRouteIndex } = require('../utils/watcher');
+const { getWatchedRouteIndex, getWatchers } = require('../utils/watcher');
 const { notifyUser } = require('../utils/pushNotification');
-
-function createWatchersFile() {
-    fs.writeFile(PATHS.WATCHERS, JSON.stringify({}), () => {});
-}
 
 function getCzechDateAndTime(dateString) {
     const date = new Date(dateString);
@@ -57,25 +53,6 @@ function editWatchedRouteProps(userToken, route, props) {
                 });
             } else {
                 reject(new WatchdogError('The route is not watched.'));
-            }
-        });
-    });
-}
-
-function getWatchers() {
-    return new Promise((resolve, reject) => {
-        fs.readFile(PATHS.WATCHERS, (err, data) => {
-            if (err) {
-                createWatchersFile();
-                reject(new WatchdogError('Failed to load watched routes.'));
-                return;
-            }
-
-            try {
-                const watchers = JSON.parse(data);
-                resolve(watchers);
-            } catch (error) {
-                reject(new WatchdogError('Failed to parse watched routes.'));
             }
         });
     });
@@ -167,6 +144,9 @@ function checkRoutesOFAllWatchers() {
             Object.keys(watchers).forEach((userToken) => {
                 checkRoutesOfWatcher(watchers[userToken]);
             })
+        })
+        .catch((error) => {
+            console.error(error);
         });
 }
 
