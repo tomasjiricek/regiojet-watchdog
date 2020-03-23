@@ -186,6 +186,11 @@ export default class App extends Component {
 
     handleToggleWatchdog = (route) => {
         const { watchedRoutes } = this.state;
+
+        if ( watchedRoutes === null || watchedRoutes instanceof Error) {
+            return;
+        }
+
         const existingRouteIndex = getWatchedRouteIndex(watchedRoutes, route);
 
         if (existingRouteIndex !== null) {
@@ -244,7 +249,7 @@ export default class App extends Component {
                 return res.json();
             })
             .then((res) => this.setState({ loading: false, watchedRoutes: res.data }))
-            .catch(() => this.setState({ loading: false }));
+            .catch(() => this.setState({ loading: false, watchedRoutes: new Error('Failed to load routes.') }));
     }
 
     renderLogOutButton() {
@@ -358,7 +363,7 @@ export default class App extends Component {
         const { userData: { deviceId }, watchedRoutes } = this.state;
         return (
             <Tab eventKey={2} title="Sledované spoje">
-                {watchedRoutes !== null
+                {watchedRoutes !== null && !(watchedRoutes instanceof Error)
                     ? <Watchdog deviceId={deviceId} routes={watchedRoutes} onUnwatch={this.handleToggleWatchdog}/>
                     : (
                         <h3>
