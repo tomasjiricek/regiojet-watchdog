@@ -56,10 +56,17 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('push', (event) => {
+    let data = null;
+    try {
+        data = event.data.json();
+    } catch (_) {
+        return;
+    }
+
     const options = {
-        body: event.data.text(),
+        body: data.message,
         icon: '/static/images/icons/icon-256.png',
-        tag: 'rj-watchdog-id',
+        tag: `rj-wdid-${data.id}`,
         renotify: true
     };
 

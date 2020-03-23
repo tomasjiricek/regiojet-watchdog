@@ -139,8 +139,8 @@ function saveSubscription(userToken, subscription) {
 }
 
 function sendNotification(userToken, subscription, data) {
-    const { message, ...options } = data;
-    return webpush.sendNotification(subscription, message, options)
+    const { message, id, ...options } = data;
+    return webpush.sendNotification(subscription, JSON.stringify({ message, id }), options)
         .catch((error) => {
             if (error.statusCode === HTTP_ERROR_UNSUBSCRIBED_OR_EXPIRED) {
                 return unsubscribeUser(userToken, subscription);

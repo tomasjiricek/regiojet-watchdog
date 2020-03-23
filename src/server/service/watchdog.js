@@ -112,11 +112,12 @@ function checkUserRouteSeatsChanged(token, route) {
             const { freeSeatsCount: currentFreeSeatsCount } = data;
 
             if (currentFreeSeatsCount > freeSeatsCount && freeSeatsCount === 0) {
-                console.log(`Should notify user about free seats (${date}, ${departureStation} -> ${arrivalStation}, ${freeSeatsCount} seats)`);
+                console.log(`Should notify user about free seats (${date}, ${departureStation} -> ${arrivalStation}, ${currentFreeSeatsCount} seats)`);
                 notifyUser(token, {
                     message: constructNotificationMessage({
-                        arrivalStation, currentFreeSeatsCount, date, departureStation
-                    })
+                        arrivalStation, currentFreeSeatsCount, date, departureStation,
+                    }),
+                    id: `${routeId}${departureStationId}${arrivalStationId}`
                 }).catch((error) => {
                     console.error('Failed to notify user.', error);
                 });
@@ -133,7 +134,8 @@ function checkUserRouteSeatsChanged(token, route) {
                 if (message === MESSAGE_NO_FREE_SEATS && statusCode === HTTP_STATUS_NO_FREE_SEATS) {
                     if (freeSeatsCount > 0) {
                         notifyUser(token, {
-                            message: constructNotificationMessage({ arrivalStation, date, departureStation })
+                            message: constructNotificationMessage({ arrivalStation, date, departureStation }),
+                            id: `${routeId}${departureStationId}${arrivalStationId}`
                         }).catch((error) => {
                             console.info('Failed to notify user:', error);
                         });
