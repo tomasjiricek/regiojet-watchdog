@@ -26,7 +26,7 @@ function getCzechDateAndTime(dateString) {
     return `${date.getDate()}. ${date.getMonth() + 1}. - ${hours}:${minutes}`;
 }
 
-function editWatchedRouteProps(userToken, routeId, props) {
+function editWatchedRouteProps(userToken, route, props) {
     return new Promise((resolve, reject) => {
         fs.readFile(PATHS.WATCHERS, (err, data) => {
             let watchers = {};
@@ -44,7 +44,7 @@ function editWatchedRouteProps(userToken, routeId, props) {
             }
 
             const watcher = watchers[userToken];
-            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, routeId);
+            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
 
             if (watchedRouteIndex !== null) {
                 watcher.routes[watchedRouteIndex] = { ...watcher.routes[watchedRouteIndex], ...props };
@@ -85,7 +85,7 @@ function checkRoutesOfWatcher({ token, routes }) {
     routes.forEach((route) => {
         checkUserRouteSeatsChanged(token, route)
             .then((freeSeatsCount) => {
-                editWatchedRouteProps(token, route.id, { freeSeatsCount }).catch((error) => {
+                editWatchedRouteProps(token, route, { freeSeatsCount }).catch((error) => {
                     console.error('Error while editing props:', error);
                 });
             })
