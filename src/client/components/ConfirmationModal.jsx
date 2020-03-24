@@ -17,7 +17,20 @@ export default class Modal extends Component {
             <BSModal.Dialog className="confirmation-dialog">
                 {this.renderModalHeader()}
                 {this.renderModalBody()}
+                {this.renderModalFooter()}
             </BSModal.Dialog>
+        );
+    }
+
+    renderModalFooter() {
+        const { buttonLabelNo, buttonLabelYes } = this.props;
+        return (
+            <BSModal.Footer>
+                <div className="buttons">
+                    {buttonLabelYes && <Button className="yes" bsStyle="primary" onClick={this.handleSubmit}>{buttonLabelYes}</Button>}
+                    {buttonLabelNo && <Button className="no" bsStyle="default" onClick={this.handleCancel}>{buttonLabelNo}</Button>}
+                </div>
+            </BSModal.Footer>
         );
     }
 
@@ -32,15 +45,12 @@ export default class Modal extends Component {
     }
 s
     renderModalBody() {
-        const { buttonLabelNo, buttonLabelYes, text } = this.props;
+        const { error, text } = this.props;
 
         return (
             <BSModal.Body>
                 <p>{text}</p>
-                <div className="buttons">
-                    <Button className="yes" bsStyle="primary" onClick={this.handleSubmit}>{buttonLabelYes}</Button>
-                    <Button className="no" bsStyle="default" onClick={this.handleCancel}>{buttonLabelNo}</Button>
-                </div>
+                {error !== null && <p className="error-message">{error}</p>}
             </BSModal.Body>
         );
     }

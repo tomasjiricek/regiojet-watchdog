@@ -54,6 +54,7 @@ export default class App extends Component {
             isAuthorized: false,
             loading: false,
             notificationDialogDismissed: false,
+            notificationsSubscriptionError: null,
             subscribed: false,
             userData: null,
             userVerified: false,
@@ -159,7 +160,8 @@ export default class App extends Component {
 
     handleUserAllowedNotifications = () => {
         if (Notification.permission === 'denied') {
-            alert('Oznámení jsou blokována prohlížečem. Odblokujte je v nastavení stránky a zkuste to znovu.');
+            const message = 'Oznámení jsou blokována prohlížečem. Odblokujte je v nastavení stránky a zkuste to znovu.';
+            this.setState({ notificationsSubscriptionError: { message } });
             return;
         }
 
@@ -364,10 +366,15 @@ export default class App extends Component {
     }
 
     renderModalAllowNotifications() {
+        const { notificationsSubscriptionError } = this.state;
         return (
             <ConfirmationModal
                 buttonLabelNo="Později"
                 buttonLabelYes="Povolit"
+                error={notificationsSubscriptionError !== null
+                    ? <span><strong>Nepodařilo se povolit oznámení.</strong><br/>{notificationsSubscriptionError.message}</span>
+                    : null
+                }
                 text={
                     <Fragment>
                         <strong>Hlavním cílem aplikace je posílání oznámení.</strong>
@@ -456,6 +463,7 @@ export default class App extends Component {
                             this.setState({ notificationsBlocked: true });
                         } else {
                             console.error('Unable to subscribe to push.', e);
+                            this.setState({ notificationsSubscriptionError: e });
                         }
                     });
             });
