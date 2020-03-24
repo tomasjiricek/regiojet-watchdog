@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { PageHeader, Tab, Tabs, Button } from 'react-bootstrap';
 
 import About from './About';
+import ConfirmationModal from './ConfirmationModal';
 import MasterLogin from './Login/MasterLogin';
 import Search from './Search';
 import StateStorage from '../utils/StateStorage';
@@ -47,14 +48,16 @@ export default class App extends Component {
         this.pushSubscription = null;
         this.state = {
             activeContentTab: 1,
-            date: getUTCISODate(new Date()),
-            watchedRoutes: null,
             arrivalStation: null,
+            date: getUTCISODate(new Date()),
             departureStation: null,
             isAuthorized: false,
-            userVerified: false,
             loading: false,
+            notificationDialogDismissed: false,
+            subscribed: false,
             userData: null,
+            userVerified: false,
+            watchedRoutes: null,
             ...loadedState,
         };
     }
@@ -133,10 +136,6 @@ export default class App extends Component {
                 }
                 return res.json();
             })
-            .then((res) => {
-                this.subscribeForNotifications();
-                return Promise.resolve(res);
-            })
             .then((res) => this.setState({ loading: false, isAuthorized: res.data.authorized }))
             .catch(() => this.setState({ loading: false }));
     }
@@ -156,6 +155,19 @@ export default class App extends Component {
     handleReloadRoutesClick = (event) => {
         event.preventDefault();
         this.loadWatchedRoutes();
+    }
+
+    handleUserAllowedNotifications = () => {
+        if (Notification.permission === 'denied') {
+            alert('Oznámení jsou blokována prohlížečem. Odblokujte je v nastavení stránky a zkuste to znovu.');
+            return;
+        }
+
+        this.subscribeForNotifications();
+    }
+
+    handleUserCancelledNotifications = () => {
+        this.setState({ notificationDialogDismissed: true });
     }
 
     handleUserLogIn = (userData) => {
@@ -263,8 +275,9 @@ export default class App extends Component {
             navigator.serviceWorker.register('static/sw.js', { scope: '/' }).then((reg) => {
                 reg.pushManager.getSubscription().then((subscription) => {
                     if (subscription === null) {
-                        // Update UI to ask user to register for Push
+                        this.setState({ subscribed: false });
                     } else {
+                        this.setState({ subscribed: true });
                         this.pushSubscription = subscription;
                     }
                 });
@@ -276,7 +289,7 @@ export default class App extends Component {
     }
 
     render() {
-        const { isAuthorized, loading, userData } = this.state;
+        const { isAuthorized, loading, notificationDialogDismissed, subscribed, userData } = this.state;
 
         if (loading) {
             return this.renderPageHeader('Načítání...');
@@ -293,6 +306,7 @@ export default class App extends Component {
         return (
             <Fragment>
                 {this.renderPageHeader('RegioJet hlídač')}
+                {!subscribed && !notificationDialogDismissed && this.renderModalAllowNotifications()}
                 {this.renderContentTabs()}
             </Fragment>
         );
@@ -346,6 +360,28 @@ export default class App extends Component {
                 Chyba při načítání sledovaných spojů.
                 <a href="" onClick={this.handleReloadRoutesClick}>Zkusit znovu</a>
             </h3>
+        );
+    }
+
+    renderModalAllowNotifications() {
+        return (
+            <ConfirmationModal
+                buttonLabelNo="Později"
+                buttonLabelYes="Povolit"
+                text={
+                    <Fragment>
+                        <strong>Hlavním cílem aplikace je posílání oznámení.</strong>
+                        <br/>
+                        <span>
+                            Oznamovat se bude uvolnění míst, pokud sledovaný spoj byl plně obsazený,
+                            a úplné obsazení, pokud byla nějaká místa volná.
+                        </span>
+                    </Fragment>
+                }
+                title="Povolit oznámení"
+                onCancel={this.handleUserCancelledNotifications}
+                onSubmit={this.handleUserAllowedNotifications}
+            />
         );
     }
 
@@ -411,10 +447,13 @@ export default class App extends Component {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then((reg) => {
                 reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: WEBPACK_VAR_WEB_PUSH_PUBLIC_KEY })
-                    .then((sub) => this.saveSubscription(sub))
+                    .then((subscription) => {
+                        this.setState({ subscribed: true, notificationsBlocked: false });
+                        this.saveSubscription(subscription);
+                    })
                     .catch((e) => {
                         if (Notification.permission === 'denied') {
-                            // Permission denied
+                            this.setState({ notificationsBlocked: true });
                         } else {
                             console.error('Unable to subscribe to push.', e);
                         }
