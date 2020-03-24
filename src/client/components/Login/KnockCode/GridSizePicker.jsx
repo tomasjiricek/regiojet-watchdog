@@ -39,7 +39,7 @@ export default class GridSizePicker extends Component {
         };
 
         for (let i = 0; i < size; i++) {
-            cols.push(<td key={i} style={colStyle}></td>);
+            cols.push(<td key={i} style={colStyle}/>);
         }
 
         for (let i = 0; i < size; i++) {
