@@ -73,10 +73,6 @@ export default class App extends Component {
             this.verifyUser();
         }
 
-        Notification.requestPermission((status) => {
-            // Handle the status if necessary
-        });
-
         this.registerServiceWorker();
     }
 
