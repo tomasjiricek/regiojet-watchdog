@@ -66,7 +66,7 @@ function unsubscribeUser(userToken, subscription) {
                     return;
                 }
 
-                const subscriber = subscribers[token];
+                const subscriber = subscribers[userToken];
                 subscriber.subscriptions = subscriber.subscriptions.filter((value) => (
                     value.endpoint !== subscription.endpoint
                 ));
@@ -79,9 +79,9 @@ function unsubscribeUser(userToken, subscription) {
                     resolve();
                 });
 
-            } catch (_) {
-                createWebPushSubscriptionsFile();
-                reject({ code: 410, message: 'Not found' });
+            } catch (e) {
+                console.error('Failed to unsubscribe:', e);
+                reject({ code: 410, message: 'Not found ' });
             }
         });
     });
