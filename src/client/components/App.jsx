@@ -276,7 +276,7 @@ export default class App extends Component {
                         this.setState({ subscribed: false });
                     } else {
                         this.setState({ subscribed: true });
-                        this.pushSubscription = subscription;
+                        this.saveSubscription(subscription);
                     }
                 });
             })
