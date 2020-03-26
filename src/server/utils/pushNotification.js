@@ -1,4 +1,5 @@
 const fs = require('fs');
+const sqlite = require('sqlite3');
 const webpush = require('web-push');
 
 const { PATHS } = require('../../common/constants');
