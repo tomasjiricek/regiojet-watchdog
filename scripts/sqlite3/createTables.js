@@ -1,0 +1,47 @@
+const sqlite = require('sqlite3').verbose();
+
+const { PATHS } = require('../../src/common/constants');
+
+const SQL_CREATE_TABLE = {
+    AUTHORIZED_DEVICES:
+        `CREATE TABLE authorized_devices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id VARCHAR(35) NOT NULL
+        )`,
+    USERS:
+        `CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token VARCHAR(64)
+        )`,
+    WATCHED_ROUTES:
+        `CREATE TABLE watched_routes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            route_data VARCHAR(2000) NOT NULL
+        )`,
+    PUSH_SUBSCRIPTIONS:
+        `CREATE TABLE push_subscriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            endpoint VARCHAR(300) NOT NULL,
+            p256dh VARCHAR(150) NOT NULL,
+            auth VARCHAR(50) NOT NULL
+        )`
+
+}
+
+const db = new sqlite.Database(PATHS.DB_STORAGE_PATH);
+
+db.on('open', () => {
+    Object.values(SQL_CREATE_TABLE).forEach((sqlQuery) => {
+        db.run(sqlQuery, (error) => {
+            if (error) {
+                console.error('Failed to create table:', error.message);
+            }
+        });
+    });
+});
+
+process.on('exit', () => {
+    db.close();
+});

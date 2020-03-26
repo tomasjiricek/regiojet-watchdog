@@ -43,11 +43,9 @@ router.get('/is-authorized', (req, res) => {
 router.post('/master-login', (req, res) => {
     res.set('Content-Type', 'application/json');
     isPasswordValid(req.body.password)
-        .then((data) => {
-            authorizeDevice(req.body.deviceId);
-            res.status(200).send({ status: 'OK', data });
-        })
-        .catch((error) => expressError(res, { statusCode: 403, error }));
+        .then(() => authorizeDevice(req.body.deviceId))
+        .then(() => res.status(200).send({ status: 'OK' }))
+        .catch((error) => expressError(res, { statusCode: error.code, error }));
 
 });
 

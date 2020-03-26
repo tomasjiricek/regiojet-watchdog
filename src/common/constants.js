@@ -4,6 +4,7 @@ const DATA_PATH = path.resolve(__dirname, '../../data');
 
 const PATHS = {
     AUTHORIZED_DEVICES: path.join(DATA_PATH, 'authorized-devices.json'),
+    DB_STORAGE_PATH: path.join(DATA_PATH, 'db-storage.sqlite'),
     SECRETS: path.join(DATA_PATH, 'secrets.json'),
     USERS: path.join(DATA_PATH, 'users.json'),
     WATCHERS: path.join(DATA_PATH, 'watchers.json'),
