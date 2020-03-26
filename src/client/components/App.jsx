@@ -9,7 +9,7 @@ import StateStorage from '../utils/StateStorage';
 import UserLogin from './Login/UserLogin';
 import Watchdog from './Watchdog';
 
-import { getUTCISODate } from '../utils/date';
+import { getUTCISODate } from '../../common/utils/date';
 import request from '../utils/request';
 
 import './app.css';
@@ -195,8 +195,8 @@ export default class App extends Component {
     }
 
     handleToggleWatchdog = (route) => {
-        const { watchedRoutes } = this.state;
-
+        const { arrivalStation, departureStation, watchedRoutes } = this.state;
+        route = { ...route, arrivalStation, departureStation };
         if ( watchedRoutes === null || watchedRoutes instanceof Error) {
             return;
         }
@@ -479,8 +479,8 @@ export default class App extends Component {
     }
 
     watchRoute(route) {
-        const { arrivalStation, departureStation, userData: { token: userToken } } = this.state;
-        const body = JSON.stringify({ userToken, route: { ...route, arrivalStation, departureStation } });
+        const { userData: { token: userToken } } = this.state;
+        const body = JSON.stringify({ userToken, route });
 
         request('/api/watchdog/watch')
             .usePost()
