@@ -4,6 +4,39 @@ const webpush = require('web-push');
 const { PATHS } = require('../../common/constants');
 const secrets = require(PATHS.SECRETS);
 
+const db = new sqlite.Database(PATHS.DB_STORAGE_PATH);
+
+const SQL = {
+    GET_SUBSCRIBED:
+        `
+        SELECT COUNT(a.id)
+        FROM push_subscriptions a
+        INNER JOIN users b ON a.user_id = b.id
+        WHERE b.token = ? AND a.endpoint = ?
+        `,
+    GET_SUBSCRIPTIONS:
+        `
+        SELECT a.endpoint, a.p256dh, a.auth, b.token AS user_token
+        FROM push_subscriptions a
+        INNER JOIN users b ON a.user_id = b.id
+        WHERE user_token = ?
+        `,
+    SUBSCRIBE:
+        `
+        INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+            SELECT id, ?, ?, ?
+            FROM users
+            WHERE token = ?
+        `,
+    UNSUBSCRIBE:
+        `
+        DELETE FROM push_subscriptions
+        WHERE user_id IN (
+            SELECT id FROM users WHERE token = ?
+        ) AND endpoint = ?
+        `
+};
+
 const HTTP_ERROR_UNSUBSCRIBED_OR_EXPIRED = 410;
 const WEB_PUSH_OPTIONS = {
     TTL: 600 // Time To Live in seconds
