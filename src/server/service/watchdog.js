@@ -68,7 +68,7 @@ function checkUserRouteSeatsChanged(token, route) {
         freeSeatsCount = 0
     } = route;
 
-    const date = getShortCzechDateAndTime(departureTime);
+    const date = getShortCzechDateAndTime(new Date(departureTime));
     return getRouteDetails(routeId, departureStationId, arrivalStationId)
         .then((data) => {
             const { freeSeatsCount: currentFreeSeatsCount } = data;
