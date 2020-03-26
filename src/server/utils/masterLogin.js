@@ -9,7 +9,7 @@ const MASTER_PASSWORD = 'fb0cb9bcd4a1b61a56196d7148696bd689200800478fcfb8c9963aa
 const SQL = {
     AUTHORIZE: 'INSERT INTO authorized_devices (device_id) VALUES (?)',
     GET_AUTHORIZED: 'SELECT id FROM authorized_devices WHERE device_id = ?'
-}
+};
 
 function isPasswordValid(password) {
     return new Promise((resolve, reject) => {
