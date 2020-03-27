@@ -15,7 +15,7 @@ class Search extends Component {
             loadingStations: true,
             loadingRoutes: false,
             stations: null,
-            routes: null,
+            searchResults: null,
         };
     }
 
@@ -44,21 +44,21 @@ class Search extends Component {
     handleSearchSubmit = () => {
         const { arrivalStation, date, departureStation, deviceId } = this.props;
         const { minDeparture, maxDeparture } = this.state;
-        const requestQuery = {
-            arrivalStationId: arrivalStation.id,
-            arrivalStationType: arrivalStation.isCity ? 'CITY' : 'STATION',
+
+        const body = JSON.stringify({
+            arrivalStation,
             date: date.split('T')[0],
-            departureStationId: departureStation.id,
-            departureStationType: departureStation.isCity ? 'CITY' : 'STATION',
+            departureStation,
             deviceId,
             minDeparture,
             maxDeparture,
-        };
+        });
 
         this.setState({ loadingRoutes: true });
-        const fetchRequest = request(API_URL.ROUTE_SEARCH, requestQuery);
-        this.routeSearchAbort = fetchRequest.abort;
-        fetchRequest.send()
+        const postRequest = request(API_URL.ROUTE_SEARCH).usePost();
+        this.routeSearchAbort = postRequest.abort;
+        postRequest
+            .send({ body })
             .then((res) => {
                 if (res.status !== 200) {
                     return;
@@ -89,14 +89,14 @@ class Search extends Component {
     }
 
     processSearchResponse = (res) => {
-        this.setState({ routes: res.data, loadingRoutes: false });
+        this.setState({ searchResults: res.data, loadingRoutes: false });
     }
 
     render() {
         const {
             loadingStations,
             loadingRoutes,
-            routes,
+            searchResults,
             stations,
         } = this.state;
 
@@ -119,14 +119,12 @@ class Search extends Component {
                     onStationsSwap={this.handleStationsSwap}
                     onSubmit={this.handleSearchSubmit}
                 />
-                <Results
+                {searchResults && <Results
                     loading={loadingRoutes}
-                    departureStation={departureStation}
-                    arrivalStation={arrivalStation}
-                    routes={routes}
+                    data={searchResults}
                     onToggleWatchdog={this.handleToggleWatchdog}
                     watchedRoutes={this.props.watchedRoutes}
-                />
+                />}
             </Fragment>
         );
     }
