@@ -35,9 +35,7 @@ class Results extends Component {
     render() {
         const {
             loading,
-            departureStation,
-            arrivalStation,
-            routes,
+            data: { arrivalStation, departureStation, routes },
         } = this.props;
 
         if (loading) {
@@ -81,12 +79,13 @@ class Results extends Component {
     }
 
     renderTableBody() {
-        const rows = this.props.routes.map(this.renderResultRow.bind(this));
+        const { data: { routes } } = this.props;
+        const rows = routes.map(this.renderResultRow.bind(this));
         return <tbody>{rows}</tbody>;
     }
 
     renderTableHead() {
-        const { departureStation, arrivalStation } = this.props;
+        const { data: { departureStation, arrivalStation } } = this.props;
 
         return (
             <thead>

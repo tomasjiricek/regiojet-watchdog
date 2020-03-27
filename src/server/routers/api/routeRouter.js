@@ -5,36 +5,37 @@ const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../../c
 const { isDeviceAuthorized } = require('../../utils/masterLogin');
 const expressError = require('../expressError');
 
-const router = express.Router();
+function isValidStationData(station) {
+    return station && station instanceof Object && station.id && station.isCity !== undefined;
+}
 
-router.get('/search', (req, res) => {
+const router = express.Router();
+router.use(express.json());
+
+router.post('/search', (req, res) => {
     res.set('Content-Type', 'application/json');
 
-    const { departureStationId, departureStationType, arrivalStationId, arrivalStationType, deviceId } = req.query;
-    let { date, minDeparture, maxDeparture } = req.query;
+    const {
+        body: {
+            arrivalStation = null,
+            date = new Date().toISOString().split('T')[0],
+            departureStation = null,
+            deviceId = null,
+            minDeparture = '00:00',
+            maxDeparture = '23:59'
+        } = {},
+    } = req;
 
-    if (!departureStationId || !arrivalStationId || !departureStationType || !arrivalStationType) {
+    if (!isValidStationData(departureStation) || !isValidStationData(arrivalStation)) {
         return expressError(res, {
             statusCode: 400,
-            error: {
-                message: 'Missing mandatory params: departureStationId, departureStationType, arrivalStationId, arrivalStationType'
-            }
+            error: { message: 'Invalid data structure' }
         });
     }
 
-    date = date || new Date().toISOString().split('T')[0];
-
     isDeviceAuthorized(deviceId)
         .then(() => {
-            getTrainRoutes(
-                date,
-                departureStationId,
-                departureStationType,
-                arrivalStationId,
-                arrivalStationType,
-                minDeparture,
-                maxDeparture
-            )
+            getTrainRoutes(date, departureStation, arrivalStation, minDeparture, maxDeparture)
                 .then((data) => res.status(200).send({ status: 'OK', data }))
                 .catch((error) => expressError(res, { statusCode: 500, error }));
         })

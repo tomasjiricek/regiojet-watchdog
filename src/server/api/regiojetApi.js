@@ -57,11 +57,11 @@ function getHttpsRequestPromise(requestOptions, callback) {
     });
 }
 
-function getTrainRoutes(date, departureStationId, departureStationType, arrivalStationId, arrivalStationType, minDeparture, maxDeparture) {
-    const fromLocation = { id: departureStationId, type: departureStationType };
-    const toLocation = { id: arrivalStationId, type: arrivalStationType };
-    const minDepartureTime = new Date(`${date}T${minDeparture || '00:00'}${GMT_TIMEZONE}`).getTime();
-    const maxDepartureTime = new Date(`${date}T${maxDeparture || '23:59'}${GMT_TIMEZONE}`).getTime();
+function getTrainRoutes(date, departureStation, arrivalStation, minDeparture, maxDeparture) {
+    const fromLocation = { id: departureStation.id, type: departureStation.isCity ? 'CITY' : 'STATION' };
+    const toLocation = { id: arrivalStation.id, type: arrivalStation.isCity ? 'CITY' : 'STATION' };
+    const minDepartureTime = new Date(`${date}T${minDeparture}${GMT_TIMEZONE}`).getTime();
+    const maxDepartureTime = new Date(`${date}T${maxDeparture}${GMT_TIMEZONE}`).getTime();
     const requestOptions = buildRoutesSearchOptions(date, fromLocation, toLocation);
 
     return getHttpsRequestPromise(requestOptions, (resolve, reject, error, data) => {
@@ -69,12 +69,14 @@ function getTrainRoutes(date, departureStationId, departureStationType, arrivalS
             return reject(error);
         }
 
-        resolve(
-            data.routes.filter((route) => {
+        resolve({
+            arrivalStation,
+            departureStation,
+            routes: data.routes.filter((route) => {
                 const departureTime = new Date(route.departureTime).getTime();
                 return departureTime >= minDepartureTime && departureTime <= maxDepartureTime;
             })
-        );
+        });
     });
 }
 
