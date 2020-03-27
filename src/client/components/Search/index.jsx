@@ -46,9 +46,9 @@ class Search extends Component {
         const { minDeparture, maxDeparture } = this.state;
 
         const body = JSON.stringify({
-            arrivalStation: arrivalStation,
+            arrivalStation,
             date: date.split('T')[0],
-            departureStation: departureStation,
+            departureStation,
             deviceId,
             minDeparture,
             maxDeparture,
