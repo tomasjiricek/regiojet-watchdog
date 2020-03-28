@@ -170,7 +170,6 @@ export default class App extends Component {
 
     handleUserLogIn = (userData) => {
         this.setState({ userData, userVerified: true });
-        this.checkDeviceIdIsAuthorized();
     }
 
     handleUserLogOut = () => {
@@ -431,8 +430,15 @@ export default class App extends Component {
     }
 
     saveSubscription = (subscription) => {
+        const { userData } = this.state;
+
+        if (userData === null) {
+            return;
+        }
+
+        const { token: userToken = null } = userData;
+
         this.pushSubscription = subscription;
-        const { userData: { token: userToken = null } } = this.state;
         const body = JSON.stringify({ userToken, subscription });
 
         request('/api/user/push-subscribe')
