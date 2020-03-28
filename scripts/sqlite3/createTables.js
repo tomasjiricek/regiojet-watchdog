@@ -11,7 +11,8 @@ const SQL_CREATE_TABLE = {
     USERS:
         `CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            token VARCHAR(64)
+            token VARCHAR(64) NOT NULL,
+            device_id VARCHAR(35) NOT NULL
         )`,
     WATCHED_ROUTES:
         `CREATE TABLE watched_routes (
