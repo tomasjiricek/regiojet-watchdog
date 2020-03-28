@@ -9,7 +9,7 @@ const db = new sqlite.Database(PATHS.DB_STORAGE_PATH);
 const SQL = {
     GET_SUBSCRIBED:
         `
-        SELECT COUNT(a.id)
+        SELECT COUNT(a.id) as subscriptions_count
         FROM push_subscriptions a
         INNER JOIN users b ON a.user_id = b.id
         WHERE b.token = ? AND a.endpoint = ?
@@ -72,21 +72,41 @@ function findSubscriptionsByToken(token) {
 }
 
 
-function isSubscribed(userToken, { endpoint }) {
+function isSubscribed(userToken, subscription) {
     return new Promise((resolve, reject) => {
+        if (!isSubscriptionDataValid(subscription)) {
+            reject({ code: 400, message: 'Invalid data structure' });
+            return;
+        }
+
+        const { endpoint } = subscription;
         db.get(SQL.GET_SUBSCRIBED, [userToken, endpoint], (err, row) => {
             if (err) {
                 console.error('Failed to check subscription:', err);
                 reject({ code: 500, message: 'Failed to check subscription existence.' });
                 return;
             }
-            resolve(!!row); // Use !! to cast row into boolean
+
+            resolve(row.subscriptions_count > 0);
         });
     });
 }
 
-function unsubscribeUser(userToken, { endpoint }) {
+function isSubscriptionDataValid(subscription) {
+    return (
+        subscription instanceof Object && subscription.endpoint && subscription.keys instanceof Object &&
+        subscription.keys.auth && subscription.keys.p256dh
+    );
+}
+
+function unsubscribeUser(userToken, subscription) {
     return new Promise((resolve, reject) => {
+        if (!isSubscriptionDataValid(subscription)) {
+            reject({ code: 400, message: 'Invalid data structure' });
+            return;
+        }
+
+        const { endpoint } = subscription;
         db.run(SQL.UNSUBSCRIBE, [userToken, endpoint], (err) => {
             if (err) {
                 console.error('Failed to unsibscribe user:', err);
@@ -119,7 +139,7 @@ function saveSubscription(userToken, subscription) {
                     return;
                 }
 
-                const { auth, endpoint, p256dh } = subscription;
+                const { endpoint, keys: { auth, p256dh } } = subscription;
                 db.run(SQL.SUBSCRIBE, [endpoint, p256dh, auth, userToken], (err) => {
                     if (err) {
                         console.error('Failed to save subscription:', err);
