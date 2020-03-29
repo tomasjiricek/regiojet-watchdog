@@ -18,7 +18,17 @@ const SQL_CREATE_TABLE = {
         `CREATE TABLE watched_routes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            route_data VARCHAR(2000) NOT NULL
+            route_id INTEGER NOT NULL,
+            arrival_station_id INTEGER NOT NULL,
+            arrival_station_name VARCHAR(100) NOT NULL,
+            arrival_time VARCHAR(35) NOT NULL,
+            departure_station_id INTEGER NOT NULL,
+            departure_station_name VARCHAR(100) NOT NULL,
+            departure_time VARCHAR(35) NOT NULL,
+            free_seats_count INTEGER NOT NULL,
+            transfers_count INTEGER NOT NULL,
+            travel_time VARCHAR(15) NOT NULL,
+            vehicle_types VARCHAR(100) NOT NULL,
         )`,
     PUSH_SUBSCRIPTIONS:
         `CREATE TABLE push_subscriptions (
