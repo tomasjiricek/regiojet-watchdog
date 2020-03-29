@@ -60,6 +60,11 @@ Object.values(users).forEach(({ token, deviceId }, index) => {
 });
 
 function insertPushNotifications(userId, token) {
+    if (pushNotifications[token]) {
+        console.error('Subscriptions: No data for', userId, '|', token);
+        return;
+    }
+
     const subscriptions = pushNotifications[token].subscriptions;
     if (!subscriptions) {
         console.log('No pushNotifications for', userId, '|', token);
@@ -85,6 +90,11 @@ function insertPushNotifications(userId, token) {
 }
 
 function insertWatchedRoutes(userId, token) {
+    if (watchedRoutes[token]) {
+        console.error('Routes: No data for', userId, '|', token);
+        return;
+    }
+
     const routes = watchedRoutes[token].routes;
     if (!routes) {
         console.log('No routes for', userId, '|', token);
