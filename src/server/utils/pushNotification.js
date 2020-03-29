@@ -123,8 +123,8 @@ function notifyUser(token, notificationData) {
     return findSubscriptionsByToken(token)
         .then((subscriptions) => {
             subscriptions.forEach((subscription) => {
-                sendNotification(subscription, data).catch(() => {
-                    // Failed
+                sendNotification(subscription, data).catch((err) => {
+                    console.warn('Failed to notify user:', err);
                 });
             });
         });
