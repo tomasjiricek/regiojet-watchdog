@@ -3,7 +3,8 @@ const path = require('path');
 const DATA_PATH = path.resolve(__dirname, '../../data');
 
 const PATHS = {
-    DB_STORAGE_PATH: path.join(DATA_PATH, 'db-storage.sqlite')
+    DB_STORAGE_PATH: path.join(DATA_PATH, 'db-storage.sqlite'),
+    SECRETS: path.join(DATA_PATH, 'secrets.json')
 };
 
 module.exports = {
