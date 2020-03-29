@@ -22,7 +22,7 @@ class Results extends Component {
     isRouteWatched({ arrivalStationId, departureStationId, id: routeId }) {
         for (const item of this.props.watchedRoutes) {
             if (
-                routeId === item.id &&
+                routeId === item.routeId &&
                 arrivalStationId === item.arrivalStationId &&
                 departureStationId === item.departureStationId
             ) {

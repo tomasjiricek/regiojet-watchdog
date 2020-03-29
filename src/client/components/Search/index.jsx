@@ -38,7 +38,20 @@ class Search extends Component {
     }
 
     handleToggleWatchdog = (route) => {
-        this.props.onToggleWatchdog(route);
+        const routeData = {
+            routeId: route.id,
+            arrivalStationId: route.arrivalStation.id,
+            arrivalStationName: route.arrivalStation.fullname,
+            arrivalTime: route.arrivalTime,
+            departureStationId: route.departureStation.id,
+            departureStationName: route.departureStation.fullname,
+            departureTime: route.departureTime,
+            freeSeatsCount: route.freeSeatsCount,
+            transfersCount: route.transfersCount,
+            travelTime: route.travelTime,
+            vehicleTypes: route.vehicleTypes
+        };
+        this.props.onToggleWatchdog(routeData);
     }
 
     handleSearchSubmit = () => {
