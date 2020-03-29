@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS, PATHS } = require('../../common/constants');
+const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS } = require('../../common/constants');
 const { getRouteDetails } = require('../api/regiojetApi');
-const { getAllWatchedRoutes, updateRouteSeats } = require('../utils/watcher');
+const { getAllWatchedRoutes, unwatchRoute, updateRouteSeats } = require('../utils/watcher');
 const { notifyUser } = require('../utils/pushNotification');
 const { getShortCzechDateAndTime } = require('../../common/utils/date');
 
@@ -83,7 +83,17 @@ function constructNotificationMessage({
 function checkRoutesOFAllWatchers() {
     getAllWatchedRoutes()
         .then((watchedRoutes) => {
+            const currentTimestamp = new Date().getTime();
+
             watchedRoutes.forEach(({ token, route }) => {
+                if (new Date(route.departureTime).getTime() < currentTimestamp) {
+                    unwatchRoute(token, route)
+                        .catch(() => {
+                            // No need to catch this
+                        });
+                    return;
+                }
+
                 checkUserRouteSeatsChanged(token, route)
                     .catch(() => {
                         // Nothing to catch
