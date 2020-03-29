@@ -60,7 +60,7 @@ Object.values(users).forEach(({ token, deviceId }, index) => {
 });
 
 function insertPushNotifications(userId, token) {
-    if (pushNotifications[token]) {
+    if (!pushNotifications[token]) {
         console.error('Subscriptions: No data for', userId, '|', token);
         return;
     }
@@ -90,7 +90,7 @@ function insertPushNotifications(userId, token) {
 }
 
 function insertWatchedRoutes(userId, token) {
-    if (watchedRoutes[token]) {
+    if (!watchedRoutes[token]) {
         console.error('Routes: No data for', userId, '|', token);
         return;
     }
