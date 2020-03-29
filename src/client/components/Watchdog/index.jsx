@@ -15,7 +15,8 @@ export default class Watchdog extends Component {
         };
     }
 
-    handleUnwatch = (route) => {
+    handleUnwatch = (route, event) => {
+        event.stopPropagation();
         this.props.onUnwatch(route);
     }
 
@@ -26,11 +27,11 @@ export default class Watchdog extends Component {
             return false;
         }
 
-        const { arrivalStationId, departureStationId, id: routeId } = route;
+        const { arrivalStationId, departureStationId, routeId } = route;
 
         return (
 
-            routeId === displayedRoute.id &&
+            routeId === displayedRoute.routeId &&
             arrivalStationId === displayedRoute.arrivalStationId &&
             departureStationId === displayedRoute.departureStationId
         );
@@ -73,10 +74,10 @@ export default class Watchdog extends Component {
     }
 
     renderTableRow(route) {
-        const { arrivalStationId, departureStationId, id } = route;
+        const { arrivalStationId, departureStationId, routeId } = route;
 
         return (
-            <Fragment key={`${id}-${arrivalStationId}-${departureStationId}`}>
+            <Fragment key={`${routeId}-${arrivalStationId}-${departureStationId}`}>
                 {this.isRouteDisplayed(route)
                     ? this.renderRouteDetailRow(route)
                     : this.renderBasicRouteInfo(route)
@@ -87,8 +88,8 @@ export default class Watchdog extends Component {
 
     renderBasicRouteInfo(route) {
         const {
-            arrivalStation,
-            departureStation,
+            arrivalStationName,
+            departureStationName,
             departureTime,
             freeSeatsCount,
         } = route;
@@ -99,9 +100,9 @@ export default class Watchdog extends Component {
                 onClick={this.toggleRouteDetailVisibility.bind(this, route)}
             >
                 <Col>
-                    {departureStation.fullname}
+                    {departureStationName}
                     <Glyphicon glyph="arrow-right" style={{ margin: '0 5px' }}/>
-                    {arrivalStation.fullname}
+                    {arrivalStationName}
                 </Col>
                 <Col>{getShortCzechDateAndTime(new Date(departureTime))}</Col>
                 <Col>
@@ -118,15 +119,9 @@ export default class Watchdog extends Component {
 
     renderRouteDetailRow(route) {
         return (
-            <Row className="route-detail" onClick={this.toggleRouteDetailVisibility.bind(this, route.id)}>
+            <Row className="route-detail" onClick={this.toggleRouteDetailVisibility.bind(this, route)}>
                 <Col colSpan={4}><RouteDetails route={route}/></Col>
             </Row>
         )
-    }
-
-    renderRoutes() {
-        return this.props.routes.map((route) => (
-            <div key={route.id}>{new Date(route.departureTime).toLocaleTimeString()}</div>
-        ));
     }
 }

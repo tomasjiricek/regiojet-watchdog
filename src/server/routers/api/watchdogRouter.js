@@ -27,7 +27,7 @@ router.post('/watch', (req, res) => {
     res.set('Content-Type', 'application/json');
     const { body: { userToken = null, route = null } } = req;
 
-    if (!userToken || !(route instanceof Object) || !route.id) {
+    if (!userToken || !(route instanceof Object)) {
         return expressError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 
@@ -42,7 +42,7 @@ router.post('/unwatch', (req, res) => {
     res.set('Content-Type', 'application/json');
     const { body: { userToken = null, route = null } } = req;
 
-    if (!userToken || !(route instanceof Object) || !route.id) {
+    if (!userToken || !(route instanceof Object)) {
         return expressError(res, { statusCode: 400, error: { message: 'Invalid data structure' } });
     }
 

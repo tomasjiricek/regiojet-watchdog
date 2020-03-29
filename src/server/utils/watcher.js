@@ -18,6 +18,11 @@ const ROUTE_COLUMNS_MAP = { // Keep the order as is, it's important for transfor
     vehicle_types: 'JSON:vehicleTypes',
 };
 
+const ROUTE_COLUMNS_MAP_REVERSE = {};
+Object.keys(ROUTE_COLUMNS_MAP).forEach((key) => {
+    ROUTE_COLUMNS_MAP_REVERSE[ROUTE_COLUMNS_MAP[key]] = key;
+});
+
 const SQL = {
     GET_ALL_WATCHERS:
         `
@@ -133,12 +138,13 @@ function isRouteDataValid(route) {
             continue;
         }
 
-        if (!ROUTE_COLUMNS_MAP[key]) {
+        const isJson = route[key] instanceof Object;
+
+        if (isJson && !ROUTE_COLUMNS_MAP_REVERSE[`JSON:${key}`]) {
             return false;
         }
 
-        const isJson = ROUTE_COLUMNS_MAP[key].indexOf('JSON:') === 0;
-        if (isJson && !(route[key] instanceof Object)) {
+        if (!isJson && !ROUTE_COLUMNS_MAP_REVERSE[key]) {
             return false;
         }
     }

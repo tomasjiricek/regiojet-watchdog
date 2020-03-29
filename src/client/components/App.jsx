@@ -194,8 +194,7 @@ export default class App extends Component {
     }
 
     handleToggleWatchdog = (route) => {
-        const { arrivalStation, departureStation, watchedRoutes } = this.state;
-        route = { ...route, arrivalStation, departureStation };
+        const { watchedRoutes } = this.state;
         if ( watchedRoutes === null || watchedRoutes instanceof Error) {
             return;
         }

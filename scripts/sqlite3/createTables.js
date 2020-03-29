@@ -28,7 +28,7 @@ const SQL_CREATE_TABLE = {
             free_seats_count INTEGER NOT NULL,
             transfers_count INTEGER NOT NULL,
             travel_time VARCHAR(15) NOT NULL,
-            vehicle_types VARCHAR(100) NOT NULL,
+            vehicle_types VARCHAR(100) NOT NULL
         )`,
     PUSH_SUBSCRIPTIONS:
         `CREATE TABLE push_subscriptions (

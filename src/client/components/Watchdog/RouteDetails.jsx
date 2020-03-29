@@ -16,9 +16,9 @@ export default class RouteDetails extends Component {
 
     renderTableBody() {
         const {
-            arrivalStation,
+            arrivalStationName,
             arrivalTime,
-            departureStation,
+            departureStationName,
             departureTime,
             freeSeatsCount,
             transfersCount,
@@ -32,9 +32,9 @@ export default class RouteDetails extends Component {
                 <tr>
                     <th>Směr:</th>
                     <td>
-                        {departureStation.fullname}
+                        {departureStationName}
                         <Glyphicon glyph="arrow-right" style={{ margin: '0 15px' }}/>
-                        {arrivalStation.fullname}
+                        {arrivalStationName}
                     </td>
                 </tr>
                 <tr>
