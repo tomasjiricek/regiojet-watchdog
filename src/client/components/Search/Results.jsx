@@ -19,10 +19,17 @@ class Results extends Component {
         this.props.onToggleWatchdog(route);
     }
 
-    isRouteWatched({ arrivalStationId, departureStationId, id: routeId }) {
+    isRouteWatched({ id: routeId }) {
+        const {
+            data: {
+                arrivalStation: { id: arrivalStationId },
+                departureStation: { id: departureStationId }
+            }
+        } = this.props;
+
         for (const item of this.props.watchedRoutes) {
             if (
-                routeId === item.id &&
+                parseInt(routeId) === item.routeId &&
                 arrivalStationId === item.arrivalStationId &&
                 departureStationId === item.departureStationId
             ) {

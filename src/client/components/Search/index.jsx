@@ -27,7 +27,6 @@ class Search extends Component {
         clearTimeout(this.loadStationsTimer);
 
         if (this.routeSearchAbort instanceof Function) {
-            console.log('abort')
             this.routeSearchAbort();
             this.routeSearchAbort = null;
         }
@@ -38,7 +37,25 @@ class Search extends Component {
     }
 
     handleToggleWatchdog = (route) => {
-        this.props.onToggleWatchdog(route);
+        const {
+            arrivalStation: { id: arrivalStationId, fullname: arrivalStationName },
+            departureStation: { id: departureStationId, fullname: departureStationName }
+        } = this.state.searchResults;
+        const routeData = {
+            routeId: parseInt(route.id),
+            arrivalStationId,
+            arrivalStationName,
+            arrivalTime: route.arrivalTime,
+            departureStationId,
+            departureStationName,
+            departureTime: route.departureTime,
+            freeSeatsCount: route.freeSeatsCount,
+            transfersCount: route.transfersCount,
+            travelTime: route.travelTime,
+            vehicleTypes: route.vehicleTypes
+        };
+
+        this.props.onToggleWatchdog(routeData);
     }
 
     handleSearchSubmit = () => {

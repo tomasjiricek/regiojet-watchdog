@@ -1,70 +1,19 @@
 const fs = require('fs');
 
-const { WatchdogError } = require('../../common/ErrorTypes');
 const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS, PATHS } = require('../../common/constants');
 const { getRouteDetails } = require('../api/regiojetApi');
-const { getWatchedRouteIndex, getWatchers } = require('../utils/watcher');
+const { getAllWatchedRoutes, updateRouteSeats } = require('../utils/watcher');
 const { notifyUser } = require('../utils/pushNotification');
 const { getShortCzechDateAndTime } = require('../../common/utils/date');
 
-function editWatchedRouteProps(userToken, route, props) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(PATHS.WATCHERS, (err, data) => {
-            let watchers = {};
-
-            if (err) {
-                reject(new WatchdogError('Failed to load watched routes.'));
-                return;
-            }
-
-            try {
-                watchers = JSON.parse(data);
-            } catch (error) {
-                reject(new WatchdogError('Failed to parse watched routes.'));
-                return;
-            }
-
-            const watcher = watchers[userToken];
-            const watchedRouteIndex = getWatchedRouteIndex(watcher.routes, route);
-
-            if (watchedRouteIndex !== null) {
-                watcher.routes[watchedRouteIndex] = { ...watcher.routes[watchedRouteIndex], ...props };
-                fs.writeFile(PATHS.WATCHERS, JSON.stringify(watchers), (err) => {
-                    if (err) {
-                        reject(new WatchdogError('Failed to edit route props.'));
-                        return;
-                    }
-                    resolve();
-                });
-            } else {
-                reject(new WatchdogError('The route is not watched.'));
-            }
-        });
-    });
-}
-
-function checkRoutesOfWatcher({ token, routes }) {
-    routes.forEach((route) => {
-        checkUserRouteSeatsChanged(token, route)
-            .then((freeSeatsCount) => {
-                editWatchedRouteProps(token, route, { freeSeatsCount }).catch((error) => {
-                    console.error('Error while editing props:', error);
-                });
-            })
-            .catch(() => {
-                // Nothing to catch
-            });
-    });
-}
-
 function checkUserRouteSeatsChanged(token, route) {
     const {
-        arrivalStation: { fullname: arrivalStation },
         arrivalStationId,
-        departureStation: { fullname: departureStation },
+        arrivalStationName: arrivalStation,
         departureStationId,
+        departureStationName: departureStation,
         departureTime,
-        id: routeId,
+        routeId,
         freeSeatsCount = 0
     } = route;
 
@@ -72,6 +21,13 @@ function checkUserRouteSeatsChanged(token, route) {
     return getRouteDetails(routeId, departureStationId, arrivalStationId)
         .then((data) => {
             const { freeSeatsCount: currentFreeSeatsCount } = data;
+
+            if (currentFreeSeatsCount !== freeSeatsCount) {
+                updateRouteSeats(route.id, currentFreeSeatsCount)
+                    .catch(() => {
+                        // No need to catch this
+                    });
+            }
 
             if (currentFreeSeatsCount > freeSeatsCount && freeSeatsCount === 0) {
                 console.log(`Should notify user about free seats (${date}, ${departureStation} -> ${arrivalStation}, ${currentFreeSeatsCount} seats)`);
@@ -95,6 +51,7 @@ function checkUserRouteSeatsChanged(token, route) {
 
                 if (message === MESSAGE_NO_FREE_SEATS && statusCode === HTTP_STATUS_NO_FREE_SEATS) {
                     if (freeSeatsCount > 0) {
+                        updateRouteSeats(route.id, 0);
                         notifyUser(token, {
                             message: constructNotificationMessage({ arrivalStation, date, departureStation }),
                             id: `${routeId}${departureStationId}${arrivalStationId}`
@@ -124,10 +81,13 @@ function constructNotificationMessage({
 }
 
 function checkRoutesOFAllWatchers() {
-    getWatchers()
-        .then((watchers) => {
-            Object.keys(watchers).forEach((userToken) => {
-                checkRoutesOfWatcher(watchers[userToken]);
+    getAllWatchedRoutes()
+        .then((watchedRoutes) => {
+            watchedRoutes.forEach(({ token, route }) => {
+                checkUserRouteSeatsChanged(token, route)
+                    .catch(() => {
+                        // Nothing to catch
+                    });
             })
         })
         .catch((error) => {

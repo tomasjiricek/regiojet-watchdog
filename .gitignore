@@ -5,3 +5,4 @@ data/*.json
 data/config.js
 data/sslcert/*/*
 apache-log/*
+data/*.sqlite

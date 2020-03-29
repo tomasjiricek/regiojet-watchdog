@@ -22,7 +22,7 @@ const PERSISTENT_STATE_ITEMS = [
 ];
 
 function getWatchedRouteIndex(watchedRoutes, route) {
-    const { arrivalStationId, departureStationId, id: routeId } = route;
+    const { arrivalStationId, departureStationId, routeId } = route;
     for (let i = 0; i < watchedRoutes.length; i++) {
         const item = watchedRoutes[i];
         if (!(item instanceof Object)) {
@@ -30,7 +30,7 @@ function getWatchedRouteIndex(watchedRoutes, route) {
         }
 
         if (
-            routeId === item.id &&
+            routeId === item.routeId &&
             arrivalStationId === item.arrivalStationId &&
             departureStationId === item.departureStationId
         ) {
@@ -170,7 +170,6 @@ export default class App extends Component {
 
     handleUserLogIn = (userData) => {
         this.setState({ userData, userVerified: true });
-        this.checkDeviceIdIsAuthorized();
     }
 
     handleUserLogOut = () => {
@@ -195,8 +194,7 @@ export default class App extends Component {
     }
 
     handleToggleWatchdog = (route) => {
-        const { arrivalStation, departureStation, watchedRoutes } = this.state;
-        route = { ...route, arrivalStation, departureStation };
+        const { watchedRoutes } = this.state;
         if ( watchedRoutes === null || watchedRoutes instanceof Error) {
             return;
         }
@@ -431,8 +429,15 @@ export default class App extends Component {
     }
 
     saveSubscription = (subscription) => {
+        const { userData } = this.state;
+
+        if (userData === null) {
+            return;
+        }
+
+        const { token: userToken = null } = userData;
+
         this.pushSubscription = subscription;
-        const { userData: { token: userToken = null } } = this.state;
         const body = JSON.stringify({ userToken, subscription });
 
         request('/api/user/push-subscribe')
