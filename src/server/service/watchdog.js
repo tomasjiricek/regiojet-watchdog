@@ -4,22 +4,7 @@ const { HTTP_STATUS_NO_FREE_SEATS, MESSAGE_NO_FREE_SEATS, PATHS } = require('../
 const { getRouteDetails } = require('../api/regiojetApi');
 const { getAllWatchedRoutes, updateRouteSeats } = require('../utils/watcher');
 const { notifyUser } = require('../utils/pushNotification');
-
-function getCzechDateAndTime(dateString) {
-    const date = new Date(dateString);
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-
-    if (hours < 10) {
-        hours = `0${hours}`;
-    }
-
-    if (minutes < 10) {
-        minutes = `0${minutes}`;
-    }
-
-    return `${date.getDate()}. ${date.getMonth() + 1}. - ${hours}:${minutes}`;
-}
+const { getShortCzechDateAndTime } = require('../../common/utils/date');
 
 function checkUserRouteSeatsChanged(token, route) {
     const {
@@ -32,7 +17,7 @@ function checkUserRouteSeatsChanged(token, route) {
         freeSeatsCount = 0
     } = route;
 
-    const date = getCzechDateAndTime(departureTime);
+    const date = getShortCzechDateAndTime(new Date(departureTime));
     return getRouteDetails(routeId, departureStationId, arrivalStationId)
         .then((data) => {
             const { freeSeatsCount: currentFreeSeatsCount } = data;

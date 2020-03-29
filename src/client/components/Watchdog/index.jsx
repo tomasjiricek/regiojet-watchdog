@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Glyphicon } from 'react-bootstrap';
 
 import { Col, Row, Table } from '../Table';
+import { getShortCzechDateAndTime } from '../../../common/utils/date';
 import RouteDetails from './RouteDetails';
 
 import './watchdog.css';
@@ -63,10 +64,9 @@ export default class Watchdog extends Component {
         return (
             <thead>
                 <Row>
+                    <Col heading>Směr jízdy</Col>
                     <Col heading>Odjezd</Col>
                     <Col heading>Volných míst</Col>
-                    <Col heading>Doba cesty</Col>
-                    <Col heading>Přestupů</Col>
                 </Row>
             </thead>
         );
@@ -74,7 +74,6 @@ export default class Watchdog extends Component {
 
     renderTableRow(route) {
         const { arrivalStationId, departureStationId, id } = route;
-        const { displayedRouteDetailId } = this.state;
 
         return (
             <Fragment key={`${id}-${arrivalStationId}-${departureStationId}`}>
@@ -88,23 +87,25 @@ export default class Watchdog extends Component {
 
     renderBasicRouteInfo(route) {
         const {
+            arrivalStation,
+            departureStation,
             departureTime,
             freeSeatsCount,
-            transfersCount,
-            travelTime
         } = route;
-        const date = new Date(departureTime);
 
         return (
             <Row
                 className="route"
                 onClick={this.toggleRouteDetailVisibility.bind(this, route)}
             >
-                <Col>{`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`}</Col>
-                <Col>{freeSeatsCount}</Col>
-                <Col>{travelTime}</Col>
                 <Col>
-                    {transfersCount}
+                    {departureStation.fullname}
+                    <Glyphicon glyph="arrow-right" style={{ margin: '0 5px' }}/>
+                    {arrivalStation.fullname}
+                </Col>
+                <Col>{getShortCzechDateAndTime(new Date(departureTime))}</Col>
+                <Col>
+                    {freeSeatsCount}
                     <span className="tools">
                         <a href="#" onClick={this.handleUnwatch.bind(this, route)}>
                             <Glyphicon glyph='eye-close'/>
