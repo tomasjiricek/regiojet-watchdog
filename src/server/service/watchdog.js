@@ -93,7 +93,7 @@ function checkRoutesOFAllWatchers() {
                     unwatchRoute(token, route)
                         .then(() => notifyUser(token, {
                             message: `Spoj z ${route.departureStationName} do ${route.arrivalStationName} `
-                                + `ze dne ${getShortCzechDateAndTime(new Date(departureTime))} není k dispozici `
+                                + `ze dne ${getShortCzechDateAndTime(new Date(route.departureTime))} není k dispozici `
                                 + `a byl smazán ze sledovaných.`,
                             id: `${route.routeId}${route.departureStationId}${route.arrivalStationId}`
                         }))

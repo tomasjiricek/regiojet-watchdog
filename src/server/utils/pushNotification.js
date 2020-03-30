@@ -153,7 +153,15 @@ function saveSubscription(userToken, subscription) {
     });
 }
 
-function sendNotification({ userToken, ...subscription }, { message, id, ...options }) {
+function sendNotification({ userToken, ...subscriptionData }, { message, id, ...options }) {
+    const subscription = {
+        endpoint: subscriptionData.endpoint,
+        keys: {
+            auth: subscriptionData.auth,
+            p256dh: subscriptionData.p256dh
+        }
+    };
+
     return webpush.sendNotification(subscription, JSON.stringify({ message, id }), options)
         .catch((error) => {
             if (error.statusCode === HTTP_ERROR_UNSUBSCRIBED_OR_EXPIRED) {
