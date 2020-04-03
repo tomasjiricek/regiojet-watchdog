@@ -54,6 +54,10 @@ function checkUserRouteSeatsChanged(token, route) {
 
                 if (message === MESSAGE_NO_FREE_SEATS && statusCode === HTTP_STATUS_NO_FREE_SEATS) {
                     if (freeSeatsCount > 0) {
+                        console.log(
+                            `Should notify user about no seats (${date}, ${departureStationName} `
+                                + `-> ${arrivalStationName})`
+                        );
                         updateRouteSeats(route.id, 0);
                         notifyUser(token, {
                             message: constructNotificationMessage({ arrivalStationName, date, departureStationName }),
