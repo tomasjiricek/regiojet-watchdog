@@ -21,6 +21,8 @@ const PERSISTENT_STATE_ITEMS = [
     'userData',
 ];
 
+const INTERVAL_REFRESH_WATCHED_ROUTES = 20000;
+
 function getWatchedRouteIndex(watchedRoutes, route) {
     const { arrivalStationId, departureStationId, routeId } = route;
     for (let i = 0; i < watchedRoutes.length; i++) {
@@ -68,12 +70,18 @@ export default class App extends Component {
 
         window.addEventListener('beforeunload', this.handleWindowUnload);
 
-        this.stateSaveInterval = setInterval(this.saveCurrentState, 20000);
+        this.intervalStateSave = setInterval(this.saveCurrentState, 20000);
+        this.intervalWatchedRoutesRefresh = setInterval(
+            this.loadWatchedRoutes.bind(this, true),
+            INTERVAL_REFRESH_WATCHED_ROUTES
+        );
+
         if (userData !== null && Object.keys(userData).length > 0) {
             this.verifyUser();
         }
 
         this.registerServiceWorker();
+
     }
 
     componentDidUpdate(_, prevState) {
@@ -88,7 +96,13 @@ export default class App extends Component {
 
     componentWillUnmount() {
         window.removeEventListener('beforeunload', this.handleWindowUnload);
-        clearInterval(this.stateSaveInterval);
+        clearInterval(this.intervalStateSave);
+        clearInterval(this.intervalWatchedRoutesRefresh);
+
+        if (this.requestLoadWatchedRoutes) {
+            this.requestLoadWatchedRoutes.abort();
+            this.requestLoadWatchedRoutes = null;
+        }
     }
 
     verifyUser() {
@@ -238,17 +252,24 @@ export default class App extends Component {
         return state;
     }
 
-    loadWatchedRoutes() {
-        const { token: userToken = null } = this.state.userData;
+    loadWatchedRoutes(isRefresh = false) {
+        if (this.state.userData === null) {
+            return;
+        }
+
+        const { userData: { token: userToken = null } } = this.state;
 
         if (userToken === null) {
             return;
         }
 
-        this.setState({ loading: true });
-        const body = JSON.stringify( { userToken });
-        request('/api/watchdog/routes')
-            .usePost()
+        if (!isRefresh) {
+            this.setState({ loading: true });
+        }
+
+        const body = JSON.stringify({ userToken });
+        this.requestLoadWatchedRoutes = request('/api/watchdog/routes').usePost();
+        this.requestLoadWatchedRoutes
             .send({ body })
             .then((res) => {
                 if (res.status !== 200) {
@@ -256,8 +277,21 @@ export default class App extends Component {
                 }
                 return res.json();
             })
-            .then((res) => this.setState({ loading: false, watchedRoutes: res.data }))
-            .catch(() => this.setState({ loading: false, watchedRoutes: new Error('Failed to load routes.') }));
+            .then((res) => {
+                if (!isRefresh) {
+                    this.setState({ loading: false, watchedRoutes: res.data });
+                    return;
+                }
+                this.setState({ watchedRoutes: res.data });
+            })
+            .catch(() => {
+                if (!isRefresh) {
+                    this.setState({ loading: false, watchedRoutes: new Error('Failed to load routes.') });
+                }
+            })
+            .finally(() => {
+                this.requestLoadWatchedRoutes = null;
+            });
     }
 
     renderLogOutButton() {
